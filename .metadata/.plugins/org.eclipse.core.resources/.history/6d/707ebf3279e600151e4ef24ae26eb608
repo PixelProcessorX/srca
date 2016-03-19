@@ -1,0 +1,184 @@
+// Student Recreation Center Application
+// (Database Code by Dillon Simion)
+
+/*import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;*/
+import java.sql.*;
+import java.util.ArrayList;
+// Notice, do not import com.mysql.jdbc.* or you will have problems!
+
+
+/*
+ * 
+ *  Timestamp stamp = new Timestamp(System.currentTimeMillis());
+  Date date = new Date(stamp.getTime());
+  System.out.println(date);
+ * 
+ */
+
+public class RCDB
+{
+	public static boolean debugmode = true;        //Enable debug outputs for developers?
+	public static String  dbName    = "rcdb";      //Name of the mySQL Database
+	public static String  where     = "localhost"; //IP address or URL after //, etc...
+	public static int     port      = 3306;        //The port the MySQL database is active on.
+	public static String  username  = "RcAppReadOnlyAcc";
+	public static String  password  = "naUoDPnrSJXRi8HI2p";
+	
+	public static void main(String[] args) {
+		try{
+		Connection c = ConnectToDatabase();
+			
+		
+		//myStmt1.setNull(1, Types.INTEGER);
+		
+		CallableStatement myStmt1 = c.prepareCall("{call StoredProcedure(?,?,?,?);}");
+		myStmt1.setString(1, "First Arg");
+		myStmt1.setString(2, "Second Arg");
+		myStmt1.setInt(3,    567);
+		myStmt1.setString(4, "InOut Example"); //For IN
+		myStmt1.registerOutParameter(4, Types.VARCHAR); //For OUT
+		myStmt1.execute();
+		myStmt1.getString(4);//Get Returned OUT Value
+		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
+		ResultSetMetaData myRd = myRs.getMetaData();
+		
+		Statement myStmt0 = c.createStatement();
+		String sqlI = "insert into rcdb.table (field, field, field) values ('col0','col1','col2')";
+		String sqlU = "update rcdb set columnName='value' where columnA=value";
+		String sqlD = "delete from rcdb where columnA=value";
+		myStmt0.executeUpdate(sqlI);
+		
+		
+		
+		}catch(Exception e){
+		    throw new IllegalStateException("Generic Exception Catch Triggered", e);
+		}
+	}
+	
+	
+	
+	
+	
+	
+	static EventCat[] GetEventCategories(
+	int cat_id, 
+	int cat_fit_id, 
+	int cat_impr_id, 
+	String name_contains, 
+	String desc_contains){
+		
+		
+		return null;
+	}
+	static Fitness[] GetFitnessCategories(
+	int cat_id, 
+	int cat_impr_id, 
+	String name_contains, 
+	String desc_contains){
+		
+		
+		return null;
+	}
+	static Improvement[] GetImprovementCategories(
+	int cat_id, 
+	String name_contains, 
+	String desc_contains){
+		
+		
+		return null;
+	}
+	static Event[] GetEvents(){
+
+		
+		return null;
+	}
+	static Event[] GetEventsWhere(
+	int category, 
+	int instructor, 
+	String name_contains, 
+	java.sql.Timestamp whenbeg_min, 
+	java.sql.Timestamp whenbeg_max, 
+	java.sql.Timestamp whenend_min, 
+	java.sql.Timestamp whenend_max, 
+	int cost_min, 
+	int cost_max, 
+	int fitness_cat, 
+	int improve_cat){
+
+		
+		return null;
+	}
+	static UserEvent[] GetUserEvents(int user_id){
+		
+		
+		return null;
+	}
+	static User[] GetUser(int user_id){
+		
+		
+		return null;
+	}
+	static User[] GetUsersWhere(
+	int user_id, 
+	int is_staff, 
+	int is_instructor, 
+	String username){
+		
+		
+		return null;
+	}
+	static void RegisterUser(
+	boolean IsStaffMember, 
+	boolean IsInstructor, 
+	byte[] GoogleID, //4096 length
+	byte[] PassHash, //4096 length
+	byte[] AuthToken,//4096 length
+	String Username){
+		
+		
+		
+	}
+	static void RegisterUser(User new_user)
+	{
+		
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	static Connection ConnectToDatabase(){
+		Connection connection = null;
+		try{
+		    Class.forName("com.mysql.jdbc.Driver");
+		}catch(ClassNotFoundException e){
+		    throw new IllegalStateException("Cannot find the driver in the classpath!", e);
+		}
+		String url = "jdbc:mysql://" + where + ":" + Integer.toString(port) + "/rcdb";
+		try{
+		    connection = DriverManager.getConnection(url, username, password);
+		    return connection;
+		}catch(SQLException e){
+		    if(RCDB.debugmode == true){
+			    System.out.println("SQLException: " + e.getMessage());
+			    System.out.println("SQLState: " + e.getSQLState());
+			    System.out.println("VendorError: " + e.getErrorCode());
+		    }
+		    throw new IllegalStateException("Cannot connect the database!", e);
+		}
+	}
+}

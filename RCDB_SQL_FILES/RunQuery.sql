@@ -1,0 +1,1 @@
+call GetEventsWhere(-1, -1, "NULL", NULL, NULL, NULL, NULL, 0, 20000, -1, -1);

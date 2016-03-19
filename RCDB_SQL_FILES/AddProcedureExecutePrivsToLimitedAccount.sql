@@ -1,0 +1,1 @@
+GRANT EXECUTE ON PROCEDURE RCDB.spName TO 'RcAppReadOnlyAccount'@'localhost' identified by 'naUoDPnrSJXRi8HI2p';

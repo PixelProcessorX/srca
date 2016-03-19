@@ -1,0 +1,148 @@
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetUsersWhere`(IN p_user_id INT(11), IN p_is_staff INT(11), IN p_is_instructor INT(11), IN p_username VARCHAR(45))
+BEGIN
+if(p_user_id = -1) then set p_user_id = NULL; END IF;
+if(p_is_staff = -1) then set p_is_staff = NULL; END IF;
+if(p_is_instructor = -1) then set p_is_instructor = NULL; END IF;
+if(p_username = "NULL") then set p_username = NULL; END IF;
+SELECT 'users.*' FROM users WHERE
+	(p_user_id IS NULL OR p_user_id = users.id) AND 
+	(p_is_staff IS NULL OR p_is_staff = users.IsStaffMember) AND 
+	(p_is_instructor IS NULL OR p_is_instructor = users.IsInstructor) AND 
+	(p_username IS NULL OR p_username = users.Username);
+END
+
+
+
+
+
+
+
+
+
+`GetCatsEvent`(
+
+IN p_cat_id INT(11), 
+
+IN p_cat_fit_id INT(11), 
+
+IN p_cat_impr_id INT(11), 
+
+IN p_name_contains VARCHAR(45), 
+
+IN p_desc_contains VARCHAR(45))
+
+`GetCatsFitness`(
+
+IN p_cat_id INT(11), 
+
+IN p_cat_impr_id INT(11), 
+IN p_name_contains VARCHAR(45), 
+
+IN p_desc_contains VARCHAR(45))
+
+`GetCatsImprovement`(
+
+IN p_cat_id INT(11), 
+
+IN p_name_contains VARCHAR(45), 
+
+IN p_desc_contains VARCHAR(45))
+
+`GetEvents`()
+
+`GetEventsWhere`(
+
+IN p_category INT, 
+
+IN p_instructor INT, 
+
+IN p_name_contains VARCHAR(45), 
+
+IN p_whenbeg_min DATETIME, 
+
+IN p_whenbeg_max DATETIME, 
+
+IN p_whenend_min DATETIME, 
+
+IN p_whenend_max DATETIME, 
+
+IN p_cost_min INT, 
+
+IN p_cost_max INT, 
+
+IN p_fitness_cat INT, 
+
+IN p_improve_cat INT)
+
+`GetUserEvents`(
+IN p_user_id INT(11))
+
+`GetUsersWhere`(
+
+IN p_user_id INT(11), 
+
+IN p_is_staff INT(11), 
+
+IN p_is_instructor INT(11), 
+
+IN p_username VARCHAR(45))
+
+`RegisterUser`(
+IN IsStaffMember BIT, 
+IN IsInstructor BIT, 
+IN GoogleID VARBINARY(4096), 
+IN PassHash VARBINARY(4096), 
+IN AuthToken VARBINARY(4096), 
+IN Username VARCHAR(45))
+
+
+
+`NewUser`(
+
+IN p0 BIT, 
+
+IN p1 BIT, 
+
+IN p2 VARBINARY(4096), 
+
+IN p3 VARBINARY(4096), 
+
+IN p4 VARBINARY(4096), 
+
+IN p5 VARCHAR(45))
+
+`NewUserEvent`(
+
+IN p0 INT(11), 
+
+IN p1 INT(11), 
+
+IN p2 BIT, 
+
+IN p3 BIT, 
+
+IN p4 BIT, 
+
+IN p5 DATETIME, 
+
+IN login_token VARCHAR(4096))
+
+`DeleteLoggedInUserEvents`(
+
+IN user_id INT(11), 
+
+IN login_token VARCHAR(4096))
+
+`DeleteLoggedInUser`(
+
+IN user_id INT(11), 
+
+IN login_token VARCHAR(4096))
+
+`DeleteLoggedInUserEvent`(
+
+IN user_event_id INT(11), 
+
+IN user_id INT(11), 
+
+IN login_token VARCHAR(4096))
