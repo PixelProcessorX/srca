@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="jdbc/mysql-connector-java-5.1.38-bin.jar"/>
+	<classpathentry kind="con" path="com.google.gdt.eclipse.managedapis.MANAGED_API_CONTAINER/calendar-v3r175lv1.21.0"/>
+	<classpathentry kind="con" path="com.google.gdt.eclipse.managedapis.MANAGED_API_CONTAINER/oauth2-v2r108lv1.21.0"/>
+	<classpathentry kind="lib" path="E:/devrca_live/srca/RCDB/jdbc/google-oauth-client-1.21.0.jar"/>
+	<classpathentry kind="lib" path="E:/devrca_live/srca/RCDB/jdbc/google-oauth-client-appengine-1.21.0.jar"/>
+	<classpathentry kind="lib" path="E:/devrca_live/srca/RCDB/jdbc/google-oauth-client-java6-1.21.0.jar"/>
+	<classpathentry kind="lib" path="E:/devrca_live/srca/RCDB/jdbc/google-oauth-client-jetty-1.21.0.jar"/>
+	<classpathentry kind="lib" path="E:/devrca_live/srca/RCDB/jdbc/google-oauth-client-servlet-1.21.0.jar"/>
+	<classpathentry kind="lib" path="E:/devrca_live/srca/RCDB/jdbc/jetty-6.1.26.jar"/>
+	<classpathentry kind="output" path=""/>
+</classpath>

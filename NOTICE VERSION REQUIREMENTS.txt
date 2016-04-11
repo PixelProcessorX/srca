@@ -1,0 +1,11 @@
+I couldn't figure out how to run the calendar project Vincent uploaded and kept getting errors referring to D:\Temp\ etc etc....
+
+So I've rebuilt the base RCDB ad calendar code with all the include libraries fixed.
+
+THIS IS NOT THE FULLY UPDATED CODE BUT SHOULD MAKE BUILDING THINGS MUCH EASIER. Just include all the JARs under libs\.
+
+This version of the app code is a base copy that includes all of the libraries needed;
+****The Google OAuth and Calendar libraries need to be added via the Eclipse Google Plugin.****
+
+The client_secret.json was moved to the libs\ and libs\2\ directory (string define at start of the Java code) 
+so that it stays with the development files instead of needuing to be being buried in the machine's temp directories.

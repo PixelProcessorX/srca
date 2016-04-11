@@ -1,0 +1,22 @@
+SELECT 'users.*'   FROM users                WHERE true;
+SELECT 'events_.*' FROM events_ JOIN users   WHERE events_.id = p_event_id;
+
+SELECT 'users.*'   FROM users   JOIN events_ WHERE users.id   = p_user_id;
+
+
+INSERT INTO cats_fit   (id_impr, Name, Description)       VALUES (p_id_impr, p_name, p_desc);
+INSERT INTO cats_impr           (Name, Description)       VALUES            (p_name, p_desc);
+INSERT INTO cats_events (id_fit, Name, Description, Tags) VALUES  (p_id_fit, p_name, p_desc, p_tags);
+INSERT INTO users (IsStaffMember, IsInstructor, GoogleID, PassHash, AuthToken, Username) VALUES (p_is_staff, p_is_instrucor, p_googleid, p_passhash, p_authtoken, p_username);
+
+
+
+
+//UPDATE expression can be the DB value DEFAULT.
+UPDATE users SET col_name1 = expression, col_name2 = expression WHERE true;
+
+//The expression can fire an update if the record keyvalue is duplicated.
+INSERT INTO users (col_name1, col_name2, col_name3) VALUES ('text', 123, 42); [ON DUPLICATE KEY UPDATE ...]
+
+//Delete commands are very simple:
+DELETE FROM users WHERE true;
