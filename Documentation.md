@@ -1,7 +1,7 @@
 ## SRCA - Student Rec Center Application
 #### Project Goals
 
-Vincent Boyd, Dillon Simion, Ryan Lafrence
+Vincent Boyd (V), Dillon Simion, Ryan Lafrence
 
 Use this file to describe the project goals and completion.  
 Written in markdown syntax for github compatibility.  
@@ -52,6 +52,7 @@ What task are you working on?
 ### Main Project TODO List
 
 **Core Goals**
+
 1. Google signin used by database to authenticate users.
 2. Database able to differentiate between regular, instructor, and admin users. (Different permission levels in same app).
 3. Regular users can view available events, register for events, and a list of registered events.
@@ -59,7 +60,12 @@ What task are you working on?
 5. Admin can use app to create new events on the calendar, including assigned instructor, date/time, and repetition of the event.
 6. Java applet pulls information from the google calendar to the database.
 
-**Research to do**
+**Stretch Goals** 
+
+1. Locally stored, personal fitness tracking.
+
+**Research to do**  
+
 1. How does the google sign in let our program know who has logged in?
 2. Should we look at using a webservice? Preliminary research I (V) have done indicates it is a very good idea and not too difficult. See [here](http://programmers.stackexchange.com/questions/170463/why-to-use-web-services-instead-of-direct-access-to-a-relational-database-for-an), [here](http://stackoverflow.com/questions/2142070/why-should-a-developer-use-web-services-instead-of-direct-connections-to-a-db), and [here](http://www.agiledata.org/essays/implementationStrategies.html) for arguments, and [here](http://android-devblog.blogspot.in/2010/06/soap-on-android.html) or [here](http://www.codeproject.com/Articles/267023/Send-and-receive-json-between-android-and-php) for tutorials on the matter. This is all from a few minutes on google.
 3. How is the app going to store or refresh data from the database? For instance: Will it check every time it is opened, or will it update periodically? Will it store a local copy of the data?
