@@ -23,7 +23,9 @@ git branch <Branch Name> -Creates a new branch from master, with the given name.
 git branch -d <Branch Name> -Closes the given branch.
 git checkout <Branch Name> -Switches to a different branch.
 ```
-Of course, the system is fairly new to me, so some of this may be incorrect. If you need other commands, the internet is your friend!
+Of course, the system is fairly new to me, so some of this may be incorrect. If you need other commands, the internet is your friend!  
+One thing to note: Github does not like files larger than 100MB. Additionally, if you have a 100MB+ file inside a commit, then delete the file and create a new commit, Git will think the file is still there when pushing to github and the push will fail.
+Removing files like this from git's file history can be difficult, so try to avoid this scenario in the first place.
 
 The normal procedure to change code on github is to:
 1 Create a branch from master.
@@ -31,9 +33,6 @@ The normal procedure to change code on github is to:
 3 Commit and push the branch.
 4 On github, create a pull request to remerge the branch with master.  
 This is done so that your changes to the code do not effect the master, multiple people can start from the same master code, and you can revert to the master in case something goes wrong.
-
-
-
 
 #### Current Tasks
 What task are you working on?
