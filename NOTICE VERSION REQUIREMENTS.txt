@@ -1,8 +1,10 @@
+NOTE DATE: 2016 4/11
+
 I couldn't figure out how to run the calendar project Vincent uploaded and kept getting errors referring to D:\Temp\ etc etc....
 
 So I've rebuilt the base RCDB ad calendar code with all the include libraries fixed.
 
-THIS IS NOT THE FULLY UPDATED CODE BUT SHOULD MAKE BUILDING THINGS MUCH EASIER. Just include all the JARs under libs\.
+THIS IS NOT THE FULLY UPDATED CODE BUT SHOULD MAKE BUILDING THINGS MUCH EASIER. Just include all the JARs under libs\ and libs\2\.
 
 This version of the app code is a base copy that includes all of the libraries needed;
 ****The Google OAuth and Calendar libraries need to be added via the Eclipse Google Plugin.****

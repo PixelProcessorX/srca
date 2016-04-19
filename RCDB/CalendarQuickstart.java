@@ -180,6 +180,9 @@ public class CalendarQuickstart {
         } else {
             System.out.println("Upcoming events");
             for (Event event : items) {
+            	
+            	event.
+            	
                 DateTime start = event.getStart().getDateTime();
                 if (start == null) {
                     start = event.getStart().getDate();

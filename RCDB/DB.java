@@ -113,10 +113,14 @@ public class DB {
 			ee.id_instructor  = myRs.getInt(i++);
 			ee.name           = myRs.getString(i++);
 			ee.description    = myRs.getString(i++);
-			ee.when_dayshours = myRs.getString(i++);
+			ee.when_days      = myRs.getString(i++);
 			ee.when_beg       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
 			ee.when_end       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
 			ee.cost_cents     = myRs.getInt(i++);
+			ee.link           = myRs.getString(i++);
+			ee.calendar_id    = myRs.getString(i++);
+			ee.status         = myRs.getString(i++);
+			ee.last_updated   = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
 			list.add(ee);}
 		DbEvent[] result = new DbEvent[list.size()];
 		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
@@ -150,10 +154,14 @@ public class DB {
 			ee.id_instructor  = myRs.getInt(i++);
 			ee.name           = myRs.getString(i++);
 			ee.description    = myRs.getString(i++);
-			ee.when_dayshours = myRs.getString(i++);
+			ee.when_days      = myRs.getString(i++);
 			ee.when_beg       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
 			ee.when_end       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
 			ee.cost_cents     = myRs.getInt(i++);
+			ee.link           = myRs.getString(i++);
+			ee.calendar_id    = myRs.getString(i++);
+			ee.status         = myRs.getString(i++);
+			ee.last_updated   = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
 			list.add(ee);}
 		DbEvent[] result = new DbEvent[list.size()];
 		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
@@ -288,4 +296,45 @@ public class DB {
 		//NOT IMPLEMENTED, REQUIRES GOOGLE SIGNIN FUNCTIONALITY
 		return null;
 	}
+	
+	
+	
+
+	static DbEvent[] AdminGetUsers()
+	throws SQLException
+	{
+		CallableStatement myStmt1 = c.prepareCall("{call GetEvents()}");
+		if(ENABLEDEBUG) System.out.println(myStmt1);
+		myStmt1.execute();
+		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
+		ArrayList<DbEvent> list = new ArrayList<DbEvent>();
+		while(myRs.next()){ int i = 1; 
+			DbEvent ee          = new DbEvent();
+			ee.id             = myRs.getInt(i++);
+			ee.id_cat         = myRs.getInt(i++);
+			ee.id_instructor  = myRs.getInt(i++);
+			ee.name           = myRs.getString(i++);
+			ee.description    = myRs.getString(i++);
+			ee.when_days      = myRs.getString(i++);
+			ee.when_beg       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
+			ee.when_end       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
+			ee.cost_cents     = myRs.getInt(i++);
+			ee.link           = myRs.getString(i++);
+			ee.calendar_id    = myRs.getString(i++);
+			ee.status         = myRs.getString(i++);
+			ee.last_updated   = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
+			list.add(ee);}
+		DbEvent[] result = new DbEvent[list.size()];
+		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
+		if(ENABLEDEBUG) System.out.flush();
+		return result;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 }

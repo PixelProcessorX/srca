@@ -5,10 +5,14 @@ public class DbEvent implements ToString {
 	public int id_instructor;
 	public String name;
 	public String description;
-	public String when_dayshours;
+	public String when_days;
 	public java.sql.Timestamp when_beg;
 	public java.sql.Timestamp when_end;
 	public int cost_cents;
+	public String link;
+	public String calendar_id;
+	public String status;
+	public java.sql.Timestamp last_updated;
 	//For Search Functionality
 	public java.sql.Timestamp _when_beg_stt;
 	public java.sql.Timestamp _when_beg_end;
@@ -23,12 +27,14 @@ public class DbEvent implements ToString {
 		return (Integer.toString(id) + " " + 
 				Integer.toString(id_cat) + " " + 
 				Integer.toString(id_instructor) + " " + 
+				calendar_id + " " + 
 				name + " " + 
 				description + " " + 
-				when_dayshours + " " + 
+				when_days + " " + 
 				when_beg.toString() + " to " + 
 				when_end.toString() + " " + 
-				Integer.toString(cost_cents));
+				Integer.toString(cost_cents) + " Cents; Event is: " +
+				status);
 	}
 	DbEvent(){
 		id = -1;
@@ -36,7 +42,7 @@ public class DbEvent implements ToString {
 		id_instructor = -1;
 		name = "NULL";
 		description = "NULL";
-		when_dayshours = "NULL";
+		when_days = "NULL";
 		when_beg = null;
 		when_end = null;
 		cost_cents = -1;
@@ -48,5 +54,6 @@ public class DbEvent implements ToString {
 		_cost_cents_max = 99999999;
 		_cat_fit = -1;
 		_cat_impr = -1;
+		last_updated = null;
 	}
 }

@@ -1,0 +1,4 @@
+To import the sql file, delete all of the database schemas (after logging in) 
+and then run an import on the file (left side of screen near the top).
+
+This gives you the entire updated database as-is.
