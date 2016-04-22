@@ -27,32 +27,15 @@ import java.sql.Connection;
 import java.sql.Statement;
 
 public class CalendarQuickstart {
-
-    //CHANGED TEMPORARILY TO A FOLDER INSIDE THE DEVELOPMENT FOLDER
-	//was user.home
-	private static final String CLIENT_SECRET_PATH = "libs/client_secret.json";
-	private static final java.io.File DATA_STORE_DIR = new java.io.File(
-        System.getProperty("user.dir"), ".credentials/calendar-java-quickstart.json");
-	
+	private static final String         CLIENT_SECRET_PATH = "libs/client_secret.json";              /**CHANGED TEMPORARILY TO A FOLDER INSIDE THE DEVELOPMENT FOLDER was user.home*/
+	private static final java.io.File       DATA_STORE_DIR = new java.io.File(System.getProperty("user.dir"), ".credentials/calendar-java-quickstart.json");//System.out.println("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
+	private static final String           APPLICATION_NAME = "Google Calendar API Java Quickstart";  /** Application name. */
+    private static FileDataStoreFactory DATA_STORE_FACTORY;                                          /** Global instance of the {@link FileDataStoreFactory}. */
+    private static final JsonFactory          JSON_FACTORY = JacksonFactory.getDefaultInstance();    /** Global instance of the JSON factory. */
+    private static HttpTransport            HTTP_TRANSPORT;                                          /** Global instance of the HTTP transport. */
+    private static final List<String>               SCOPES = Arrays.asList(CalendarScopes.CALENDAR); /** Global instance of the scopes required by this quickstart. */
+    /** If modifying these scopes, delete your previously saved credentials at ~/.credentials/calendar-java-quickstart.json */
     
-    
-    /** Application name. */
-    private static final String APPLICATION_NAME =
-        "Google Calendar API Java Quickstart";
-    /** Global instance of the {@link FileDataStoreFactory}. */
-    private static FileDataStoreFactory DATA_STORE_FACTORY;
-    /** Global instance of the JSON factory. */
-    private static final JsonFactory JSON_FACTORY =
-        JacksonFactory.getDefaultInstance();
-    /** Global instance of the HTTP transport. */
-    private static HttpTransport HTTP_TRANSPORT;
-    /** Global instance of the scopes required by this quickstart.
-     *
-     * If modifying these scopes, delete your previously saved credentials
-     * at ~/.credentials/calendar-java-quickstart.json
-     */
-    private static final List<String> SCOPES =
-        Arrays.asList(CalendarScopes.CALENDAR);
     static {
         try {
             HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
@@ -62,53 +45,35 @@ public class CalendarQuickstart {
             System.exit(1);
         }
     }
-    /**
-     * Creates an authorized Credential object.
-     * @return an authorized Credential object.
-     * @throws IOException
-     */
-    public static Credential authorize() throws Exception {
-        // Load client secrets.
-        InputStream in =
-            CalendarQuickstart.class.getResourceAsStream(CLIENT_SECRET_PATH);
-        GoogleClientSecrets clientSecrets =
-            GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-
-        // Build flow and trigger user authorization request.
-        GoogleAuthorizationCodeFlow flow =
-                new GoogleAuthorizationCodeFlow.Builder(
-                        HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(DATA_STORE_FACTORY)
-                .setAccessType("offline")
-                .build();
-        Credential credential = new AuthorizationCodeInstalledApp(
-            flow, new LocalServerReceiver()).authorize("user");
-        System.out.println(
-                "Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
+    public static Credential authorize()
+    throws Exception
+    {
+        InputStream                    in = CalendarQuickstart.class.getResourceAsStream(CLIENT_SECRET_PATH);
+        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in)); // Load client secrets.
+        GoogleAuthorizationCodeFlow  flow = new GoogleAuthorizationCodeFlow.Builder
+        									(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+							                .setDataStoreFactory(DATA_STORE_FACTORY)
+							                .setAccessType("offline")
+							                .build();// Build flow and trigger user authorization request.
+        Credential             credential = new AuthorizationCodeInstalledApp
+        		                            (flow, new LocalServerReceiver())
+                                            .authorize("user");
         return credential;
-        
-        
     }
-    /**
-     * Build and return an authorized Calendar client service.
-     * @return an authorized Calendar client service
-     * @throws IOException
-     */
-    public static com.google.api.services.calendar.Calendar
-        getCalendarService() throws Exception {
+    public static com.google.api.services.calendar.Calendar getCalendarService() 
+    throws Exception 
+    {
         Credential credential = authorize();
-        return new com.google.api.services.calendar.Calendar.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, credential)
-                .setApplicationName(APPLICATION_NAME)
-                .build();
+        return  new com.google.api.services.calendar.Calendar.Builder
+                	(HTTP_TRANSPORT, JSON_FACTORY, credential)
+                	.setApplicationName(APPLICATION_NAME)
+                	.build();
     }
     
     
-    
-    
-    
-    
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args)
+    throws Exception
+    {
         // Build a new authorized API client service.
         // Note: Do not confuse this class with the
         //   com.google.api.services.calendar.model.Calendar class.
@@ -119,6 +84,17 @@ public class CalendarQuickstart {
 	    	throw new IllegalStateException("Could not connect to Google Calendar!", e);
 	    }
     	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+        /**
         //create a new event here
         Event newEvent = new Event()
         		.setSummary("A New Test Event")
@@ -143,9 +119,6 @@ public class CalendarQuickstart {
         System.out.printf("Event created: %s\n", newEvent.getHtmlLink());
         //end creating new event
         
-        
-        
-        
         //test calendar list here
         String pageToken = null;
         do {
@@ -158,10 +131,8 @@ public class CalendarQuickstart {
           pageToken = calendarList.getNextPageToken();
         } while (pageToken != null);
         //done
-        
-        
         //test event.watch
-        
+        */
         
         
         
@@ -180,17 +151,25 @@ public class CalendarQuickstart {
         } else {
             System.out.println("Upcoming events");
             for (Event event : items) {
-            	
-            	event.
-            	
                 DateTime start = event.getStart().getDateTime();
-                if (start == null) {
-                    start = event.getStart().getDate();
-                }
+                if(start == null) start = event.getStart().getDate();
                 System.out.printf("%s, %s, (%s)\n", event.getSummary(), event.getId(), start);
             }
         }
-        /*
+        System.out.printf("HELLO TESTING\n");
+        for(Event event : items){
+        	//'INSERT INTO IGNORE' tries to add the entry, but ignores any errors if it fails - including from duplicated keys.
+        	String query = "INSERT IGNORE INTO events " + 
+					"VALUES('" + event.getId() + "', '" + event.getSummary() + "'); ";
+            System.out.printf("Executing sql query: %s\n", query);
+        }
+        
+        
+        
+        
+        
+        
+        /**
         //write the event name to a database
         System.out.println("Loading driver...");
         try{
@@ -230,40 +209,10 @@ public class CalendarQuickstart {
                 }
                 System.out.println("Done!");
             }
-        	
-        	
-        	
-        	
-        	
-        	
-        	
-        	
-        	
-        	
-        	
-        	
-        	
-        	
-        	
-        	
-        	
-        	
         }catch(SQLException e){
         	throw new IllegalStateException("Could not connect to database!", e);
         }
         */
-        
-        
-        System.out.printf("HELLO TESTING\n");
-        
-        
-        for(Event event : items){
-        	//'INSERT INTO IGNORE' tries to add the entry, but ignores any errors if it fails - including from duplicated keys.
-        	String query = "INSERT IGNORE INTO events " + 
-					"VALUES('" + event.getId() + "', '" + event.getSummary() + "'); ";
-            System.out.printf("Executing sql query: %s\n", query);
-        }
-        
         
         
         

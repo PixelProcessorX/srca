@@ -25,13 +25,25 @@ public class DB {
 		    throw new IllegalStateException("Cannot connect the database!", e);
 		}
 	}
+	static protected ResultSet ExecuteSQL(String sql)
+	throws SQLException
+	{
+		try{
+			if(ENABLEDEBUG) System.out.println(sql);
+			Statement s = c.createStatement();
+			s.executeQuery(sql);
+			return s.getResultSet();
+		}catch(Exception e){
+		    throw new IllegalStateException("Error Retrieving Records or Executing Query!!", e);
+		}
+	}
 	static EventCat[] GetEventCategories(EventCat cc) 
 	throws SQLException
 	{
 		CallableStatement myStmt1 = c.prepareCall("{call GetCatsEvent(?, ?, ?, ?, ?, ?)}"); int x = 1;
 		myStmt1.setInt      (x++, cc.id);
-		myStmt1.setInt      (x++, cc._id_fit);
-		myStmt1.setInt      (x++, cc.id_improve);
+		myStmt1.setInt      (x++, cc.id_fit);
+		myStmt1.setInt      (x++, cc._id_improve);
 		myStmt1.setString   (x++, cc.name);
 		myStmt1.setString   (x++, cc.description);
 		myStmt1.setString   (x++, cc.tags);
@@ -42,7 +54,7 @@ public class DB {
 		while(myRs.next()){ int i = 1;
 			EventCat ec       = new EventCat();
 			ec.id             = myRs.getInt(i++);
-			ec.id_improve     = myRs.getInt(i++);
+			ec.id_fit         = myRs.getInt(i++);
 			ec.name           = myRs.getString(i++);
 			ec.description    = myRs.getString(i++);
 			ec.tags           = myRs.getString(i++);
@@ -298,9 +310,189 @@ public class DB {
 	}
 	
 	
+	//###################################################################################################
+	//###################################################################################################
+	//###################################################################################################
+	//###################################################################################################
+	//###################################################################################################
+	//###################################################################################################
 	
-
-	static DbEvent[] AdminGetUsers()
+	static User[]      AdminGetUsers()
+	throws SQLException
+	{
+		ResultSet myRs = ExecuteSQL("SELECT DISTINCT users.*");
+		ArrayList<User> list = new ArrayList<User>();
+		while(myRs.next()){ int i = 1;
+			User uu           = new User();
+			uu.id             = myRs.getInt(i++);
+			uu.is_staffmember = myRs.getBoolean(i++);
+			uu.is_instructor  = myRs.getBoolean(i++);
+			uu.googleid       = myRs.getBytes(i++);
+			uu.passhash       = myRs.getBytes(i++);
+			uu.authtoken      = myRs.getBytes(i++);
+			uu.username       = myRs.getString(i++);
+			uu.login_token    = myRs.getBytes(i++);//Filled Value Required for User Interactivity Verification
+			list.add(uu);}
+		User[] result = new User[list.size()];
+		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
+		if(ENABLEDEBUG) System.out.flush();
+		return result;
+	}
+	static void        AdminDelEventCat(EventCat ec)
+	throws SQLException
+	{
+		ExecuteSQL("delete from rcdb.cats_event where id="+ec.id);
+	}
+	static  void       AdminDelFitCat(Fitness fc)
+	throws SQLException
+	{
+		ExecuteSQL("delete from rcdb.cats_fit where id="+fc.id);
+	}
+	static void        AdminDelImprCat(Improvement ic)
+	throws SQLException
+	{
+		ExecuteSQL("delete from rcdb.cats_impr where id="+ic.id);
+	}
+	static void        AdminDelUser(User u)
+	throws SQLException
+	{
+		//Provides an override method so that administrators can just outright delete a user.
+		ExecuteSQL("delete from rcdb.users where id="+u.id);
+	}
+	static EventCat    AdminAddEventCat()
+	throws SQLException
+	{
+		ExecuteSQL("INSERT INTO cats_event (id, id_fit, `Name`, Description, Tags) VALUES (1, 1, 'Wieghtlifting', 'Lifting of various kinds.', 'Weights|Dumbells|lbs');");
+		return null;
+	}
+	static Fitness     AdminAddFitCat()
+	throws SQLException
+	{
+		ExecuteSQL("INSERT INTO cats_fit (id, `Name`, Description) VALUES (1, 'Muscles', 'Improves muscle areas of the body.');");
+		return null;
+	}
+	static Improvement AdminAddImprCat()
+	throws SQLException
+	{
+		ExecuteSQL("INSERT INTO cats_impr (id, id_fit, `Name`, Description) VALUES (1, 1, 'Muscles, Arm','Improves lifting performance.');");
+		return null;
+	}
+	static User        AdminEditUser(User uu)
+	throws SQLException
+	{
+		ExecuteSQL("UPDATE users SET"+
+	      " IsStaffMember = "+uu.is_staffmember+
+		  ", IsInstructor = "+uu.is_instructor+
+		      ", Username = "+uu.username+
+   " WHERE cats_event.id = "+uu.id+";");
+		return uu;
+	}
+	static EventCat    AdminEditEventCat(EventCat ec)
+	throws SQLException
+	{
+		ExecuteSQL("UPDATE cats_event SET"+
+			     " id_fit = "+ec.id_fit+
+			     ", `Name`= "+ec.name+
+		   ", Description = "+ec.description+
+		          ", Tags = "+ec.tags+
+    " WHERE cats_event.id = "+ec.id+";");
+		return ec;
+	}
+	static Fitness     AdminEditFitCat(Fitness fc)
+	throws SQLException
+	{
+		ExecuteSQL("UPDATE cats_impr SET"+
+			     ", `Name`= "+fc.name+
+		   ", Description = "+fc.description+
+	 " WHERE cats_impr.id = "+fc.id+";");
+		return fc;
+	}
+	static Improvement AdminEditImprCat(Improvement ic)
+	throws SQLException
+	{
+		ExecuteSQL("UPDATE cats_impr SET"+
+				     " id_fit = "+ic.id_fit+
+				     ", `Name`= "+ic.name+
+			   ", Description = "+ic.description+
+		 " WHERE cats_impr.id = "+ic.id+";");
+		return ic;
+	}
+	static void        AdminDoMassNotify()
+	throws SQLException
+	{
+		User[] ua = AdminGetUsers();
+		for(int i = ua.length-1; i >= 0; i--){
+			NotifyGoogleUser(ua[i]);
+		}
+		return;
+	}
+	static User[]      AdminGetEvent_HasUsers_List(User u)
+	throws SQLException
+	{
+		ResultSet myRs = ExecuteSQL("SELECT DISTINCT users.* FROM users, events_, userevents WHERE (userevents.id_user = " + u.id + ");");
+		ArrayList<User> list = new ArrayList<User>();
+		while(myRs.next()){ int i = 1;
+			User uu           = new User();
+			uu.id             = myRs.getInt(i++);
+			uu.is_staffmember = myRs.getBoolean(i++);
+			uu.is_instructor  = myRs.getBoolean(i++);
+			uu.googleid       = myRs.getBytes(i++);
+			uu.passhash       = myRs.getBytes(i++);
+			uu.authtoken      = myRs.getBytes(i++);
+			uu.username       = myRs.getString(i++);
+			uu.login_token    = myRs.getBytes(i++);//Filled Value Required for User Interactivity Verification
+			list.add(uu);}
+		User[] result = new User[list.size()];
+		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
+		if(ENABLEDEBUG) System.out.flush();
+		return result;
+	}
+	static DbEvent[]   AdminGetUser_HasEvents_List(DbEvent e)
+	throws SQLException
+	{
+		ResultSet myRs = ExecuteSQL("SELECT DISTINCT events.* FROM users, events_, userevents WHERE (userevents.id_event = " + e.id + ");");
+		ArrayList<DbEvent> list = new ArrayList<DbEvent>();
+		while(myRs.next()){ int i = 1;
+			DbEvent ee          = new DbEvent();
+			ee.id             = myRs.getInt(i++);
+			ee.id_cat         = myRs.getInt(i++);
+			ee.id_instructor  = myRs.getInt(i++);
+			ee.name           = myRs.getString(i++);
+			ee.description    = myRs.getString(i++);
+			ee.when_days      = myRs.getString(i++);
+			ee.when_beg       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
+			ee.when_end       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
+			ee.cost_cents     = myRs.getInt(i++);
+			ee.link           = myRs.getString(i++);
+			ee.calendar_id    = myRs.getString(i++);
+			ee.status         = myRs.getString(i++);
+			ee.last_updated   = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
+			list.add(ee);}
+		DbEvent[] result = new DbEvent[list.size()];
+		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
+		if(ENABLEDEBUG) System.out.flush();
+		return result;
+	}
+	static void NotifyGoogleUser(User u)
+	{
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	
+	static DbEvent[] AdminGetUsers_()
 	throws SQLException
 	{
 		CallableStatement myStmt1 = c.prepareCall("{call GetEvents()}");
@@ -330,7 +522,7 @@ public class DB {
 		return result;
 	}
 	
-	
+	*/
 	
 	
 	

@@ -1,0 +1,43 @@
+Connection          ConnectToDatabase()					Establishes a connection to the database.
+protected ResultSet ExecuteSQL(String sql)				Subfunction for running Admin SQL code.
+									
+EventCat[]    GetEventCategories(EventCat cc) 				Returns an array of Event Categories given a search criteria.
+Fitness[]     GetFitnessCategories(Fitness f)				Returns an array of Fitness Categories given a search criteria.
+Improvement[] GetImprovementCategories(Improvement ii)			Returns an array of Improvement Categories given a search criteria.
+DbEvent[]     GetEvents()						Returns All Events in the database.
+DbEvent[]     GetEventsWhere(DbEvent e)			[BUGGY]		Returns Events matching the search critera in the object passed.
+UserEvent[]   GetUserEvents(User u)					Returns a Users' Events they want notifications for.
+User          NewUser(User u) //Returns the completed User Structure.	Create a new user. Returns the User record with filled-in login data.
+void          DelUser(User u)						Delete a user. Can only be done given the correct user login data.
+UserEvent     NewUserEvent(UserEvent e, User u)				Create a new Notification/User-Event association.
+void          DelUserEvent(UserEvent e, User u)				Delete a UserEvent.
+void          DelUserEvents(User u)					Delete all of the UserEvents associated with a particular user.
+User          LoginFunction(byte[] credentials)		[NOT IMPL.]	Login in a User, given authorized information, and return the User record with its login data.
+
+//###################################################################################################
+//###################################################################################################
+//###################################################################################################
+//###################################################################################################
+//###################################################################################################
+//###################################################################################################
+
+The following Administrator functionality requires that the app user be logged in as the Database administrator account.
+The commands CANNOT work at all unless administrative access is allowed by MySQL.
+									
+User[]        AdminGetUsers()						Retrieve a list of all User objects.
+User[]        AdminGetInstructors()			[NOT IMPL.]	Retrieve a list of all User objects that are instructors.
+void          AdminDelEventCat(EventCat ec)				Delete an Event Category. There are no special database rules surrounding this.
+void          AdminDelFitCat(Fitness fc)				Delete an Fitness Category.
+void          AdminDelImprCat(Improvement ic)				Delete an Improvement Category.
+void          AdminDelUser(User u)					Delete a User and all of his/her related records. Does not require additional authentication.
+EventCat      AdminAddEventCat()					Add an Event Category. 
+Fitness       AdminAddFitCat()						Add an Fitness Category.
+Improvement   AdminAddImprCat()						Add an Improvement Category.
+User          AdminEditUser(User uu)					Edit a User's details, specifically the staff and instructor flags. App should only show instructors for adding to Events.
+EventCat      AdminEditEventCat(EventCat ec)				Add an Event Category. 
+Fitness       AdminEditFitCat(Fitness fc)				Add an Fitness Category. 
+Improvement   AdminEditImprCat(Improvement ic)				Add an Improvement Category. 
+void          AdminDoMassNotify()					Do a mass notification on all of the Google users in the database.
+User[]        AdminGetEvent_HasUsers_List(User u)			Retrieve a list of all User objects associated with (that have notifications for) an Event.
+DbEvent[]     AdminGetUser_HasEvents_List(DbEvent e)			Retrieve a list of all Event objects associated with a User.
+void          NotifyGoogleUser(User u)			[NOT IMPL.]	Submethod implementing the notification functionality.
