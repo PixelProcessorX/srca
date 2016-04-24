@@ -1,0 +1,168 @@
+
+    	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	
+	static DbEvent[] AdminGetUsers_()
+	throws SQLException
+	{
+		CallableStatement myStmt1 = c.prepareCall("{call GetEvents()}");
+		if(ENABLEDEBUG) System.out.println(myStmt1);
+		myStmt1.execute();
+		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
+		ArrayList<DbEvent> list = new ArrayList<DbEvent>();
+		while(myRs.next()){ int i = 1; 
+			DbEvent ee          = new DbEvent();
+			ee.id             = myRs.getInt(i++);
+			ee.id_cat         = myRs.getInt(i++);
+			ee.id_instructor  = myRs.getInt(i++);
+			ee.name           = myRs.getString(i++);
+			ee.description    = myRs.getString(i++);
+			ee.when_days      = myRs.getString(i++);
+			ee.when_beg       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
+			ee.when_end       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
+			ee.cost_cents     = myRs.getInt(i++);
+			ee.link           = myRs.getString(i++);
+			ee.calendar_id    = myRs.getString(i++);
+			ee.status         = myRs.getString(i++);
+			ee.last_updated   = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
+			list.add(ee);}
+		DbEvent[] result = new DbEvent[list.size()];
+		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
+		if(ENABLEDEBUG) System.out.flush();
+		return result;
+	}
+	
+	*/
+	
+    	
+        
+        // List the next 10 events from the primary calendar.
+        /**List<Event> items = events.getItems();
+        if (items.size() == 0) {
+            System.out.println("No upcoming events found.");
+        } else {
+            System.out.println("Upcoming events");
+            for (Event event : items) {
+                DateTime start = event.getStart().getDateTime();
+                if(start == null) start = event.getStart().getDate();
+                System.out.printf("%s, %s, (%s)\n", event.getSummary(), event.getId(), start);
+            }
+        }
+        System.out.printf("HELLO TESTING\n");
+        for(Event event : items){
+        	//'INSERT INTO IGNORE' tries to add the entry, but ignores any errors if it fails - including from duplicated keys.
+        	String query = "INSERT IGNORE INTO events " + 
+					"VALUES('" + event.getId() + "', '" + event.getSummary() + "'); ";
+            System.out.printf("Executing sql query: %s\n", query);
+        }*/
+        
+        
+        
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+        /**
+        //create a new event here
+        Event newEvent = new Event()
+        		.setSummary("A New Test Event")
+        		.setLocation("2200th ave chestnut, IL")
+        		.setDescription("THIS IS A HEW TESTING EVENT RIGHT HERE");
+        
+        DateTime startDateTime = new DateTime(System.currentTimeMillis()+7200000);
+        DateTime endDateTime = new DateTime(System.currentTimeMillis() + 7200000 + 7200000);
+        EventDateTime newStart = new EventDateTime()
+        		.setDateTime(startDateTime)
+        		.setTimeZone("America/Chicago");
+        
+        EventDateTime newEnd = new EventDateTime()
+        		.setDateTime(endDateTime)
+        		.setTimeZone("America/Chicago");
+        
+        newEvent.setStart(newStart);
+        newEvent.setEnd(newEnd);
+        
+        String calendarID = "primary";
+        //newEvent = service.events().insert(calendarID, newEvent).execute();
+        System.out.printf("Event created: %s\n", newEvent.getHtmlLink());
+        //end creating new event
+        
+        //test calendar list here
+        String pageToken = null;
+        do {
+          CalendarList calendarList = service.calendarList().list().setPageToken(pageToken).execute();
+          List<CalendarListEntry> items = calendarList.getItems();
+
+          for (CalendarListEntry calendarListEntry : items) {
+            System.out.println(calendarListEntry.getSummary());
+          }
+          pageToken = calendarList.getNextPageToken();
+        } while (pageToken != null);
+        //done
+        //test event.watch
+        */
+        
+        
+        
+        /**
+        //write the event name to a database
+        System.out.println("Loading driver...");
+        try{
+        	Class.forName("com.mysql.jdbc.Driver");
+        	System.out.println("Driver loaded!");
+        }catch(ClassNotFoundException e){
+        	throw new IllegalStateException("Cannot find the driver in the classpath", e);
+        }
+        
+        String url = "jdbc:mysql://localhost:3306/rcdb";
+        String username = "JavaAdmin";
+        String password = "admin";
+        
+        System.out.println("Connecting to database...");
+        Connection connection;
+        try{
+        	connection = DriverManager.getConnection(url, username, password);
+        	System.out.println("Database connected!");
+        	
+        	Statement statement = connection.createStatement();
+        	
+        	//database connection was successful, now iterate over that same list again
+            if (items.size() == 0) {
+                System.out.println("No events found to add to the database.");
+            } else {
+                System.out.println("Inserting events into database...");
+                for (Event event : items) {
+                    
+                	
+                	//'INSERT INTO IGNORE' tries to add the entry, but ignores any errors if it fails - including from duplicated keys.
+                	String query = "INSERT IGNORE INTO events " + 
+        					"VALUES('" + event.getId() + "', '" + event.getSummary() + "'); ";
+                	
+                	
+                    System.out.printf("Executing sql query: %s\n", query);
+                    //statement.executeUpdate(query); 
+                }
+                System.out.println("Done!");
+            }
+        }catch(SQLException e){
+        	throw new IllegalStateException("Could not connect to database!", e);
+        }
+        */

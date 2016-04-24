@@ -19,14 +19,6 @@ import java.util.ArrayList;
 
 public class RCDB
 {
-	//These are used in other files to login to the database.
-	public static boolean debugmode = true;        //Enable debug outputs for developers?
-	public static String  dbName    = "rcdb";      //Name of the mySQL Database
-	public static String  where     = "localhost"; //IP address or URL after //, etc...
-	public static int     port      = 3306;        //The port the MySQL database is active on.
-	public static String  username  = "JavaAdmin";//"RcAppReadOnlyAcc";
-	public static String  password  = "12345";//"naUoDPnrSJXRi8HI2p";
-	
 	public static void main(String[] args) {
 		try{
 		Connection c = DB.ConnectToDatabase();
@@ -68,7 +60,7 @@ public class RCDB
 		ue.notify = false;
 		ue = DB.NewUserEvent(ue, uu);
 		
-		cc.name = "improv";
+		cc.description = "improv";
 		
 		PrintToStringObjectArray( DB.GetEventCategories(cc) );
 		PrintToStringObjectArray( DB.GetFitnessCategories(ff) );

@@ -1,9 +1,18 @@
 import java.sql.*;
 import java.util.ArrayList;
 import java.lang.reflect.*;
+import java.util.*;
+
+import javax.mail.*;
+import javax.mail.internet.*;
+import javax.activation.*;
 
 public class DB {
-	public static boolean ENABLEDEBUG = true;
+	public static String  where     = "localhost"; //IP address or URL after //, etc...
+	public static int     port      = 3306;        //The port the MySQL database is active on.
+	public static String  username  = "JavaAdmin";//"RcAppReadOnlyAcc";
+	public static String  password  = "12345";//"naUoDPnrSJXRi8HI2p";
+	
 	public static Connection c = null;
 	static Connection ConnectToDatabase(){
 		Connection connection = null;
@@ -12,16 +21,16 @@ public class DB {
 		}catch(ClassNotFoundException e){
 		    throw new IllegalStateException("Cannot find the driver in the classpath!", e);
 		}
-		String url = "jdbc:mysql://" + RCDB.where + ":" + Integer.toString(RCDB.port) + "/rcdb";
+		String url = "jdbc:mysql://" + DB.where + ":" + Integer.toString(DB.port) + "/rcdb";
 		try{
-		    c = connection = DriverManager.getConnection(url, RCDB.username, RCDB.password);
+		    c = connection = DriverManager.getConnection(url, DB.username, DB.password);
 		    return connection;
 		}catch(SQLException e){
-		    if(RCDB.debugmode == true){
+		    /*if(from.debugmode == true){
 			    System.out.println("SQLException: " + e.getMessage());
 			    System.out.println("SQLState: " + e.getSQLState());
 			    System.out.println("VendorError: " + e.getErrorCode());
-		    }
+		    }*/
 		    throw new IllegalStateException("Cannot connect the database!", e);
 		}
 	}
@@ -29,7 +38,6 @@ public class DB {
 	throws SQLException
 	{
 		try{
-			if(ENABLEDEBUG) System.out.println(sql);
 			Statement s = c.createStatement();
 			s.executeQuery(sql);
 			return s.getResultSet();
@@ -47,7 +55,6 @@ public class DB {
 		myStmt1.setString   (x++, cc.name);
 		myStmt1.setString   (x++, cc.description);
 		myStmt1.setString   (x++, cc.tags);
-		if(ENABLEDEBUG) System.out.println(myStmt1);
 		myStmt1.execute();
 		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
 		ArrayList<EventCat> list = new ArrayList<EventCat>();
@@ -61,7 +68,6 @@ public class DB {
 			list.add(ec);}
 		EventCat[] result = new EventCat[list.size()];
 		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
-		if(ENABLEDEBUG) System.out.flush();
 		return result;
 	}
 	static Fitness[] GetFitnessCategories(Fitness f)
@@ -72,7 +78,6 @@ public class DB {
 		myStmt1.setInt      (x++, f._id_impr);
 		myStmt1.setString   (x++, f.name);
 		myStmt1.setString   (x++, f.description);
-		if(ENABLEDEBUG) System.out.println(myStmt1);
 		myStmt1.execute();
 		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
 		ArrayList<Fitness> list = new ArrayList<Fitness>();
@@ -84,7 +89,6 @@ public class DB {
 			list.add(ff);}
 		Fitness[] result = new Fitness[list.size()];
 		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
-		if(ENABLEDEBUG) System.out.flush();
 		return result;
 	}
 	static Improvement[] GetImprovementCategories(Improvement ii)
@@ -94,7 +98,6 @@ public class DB {
 		myStmt1.setInt      (x++, ii.id);
 		myStmt1.setString   (x++, ii.name);
 		myStmt1.setString   (x++, ii.description);
-		if(ENABLEDEBUG) System.out.println(myStmt1);
 		myStmt1.execute();
 		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
 		ArrayList<Improvement> list = new ArrayList<Improvement>();
@@ -107,14 +110,12 @@ public class DB {
 			list.add(im);}
 		Improvement[] result = new Improvement[list.size()];
 		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
-		if(ENABLEDEBUG) System.out.flush();
 		return result;
 	}
 	static DbEvent[] GetEvents()
 	throws SQLException
 	{
 		CallableStatement myStmt1 = c.prepareCall("{call GetEvents()}");
-		if(ENABLEDEBUG) System.out.println(myStmt1);
 		myStmt1.execute();
 		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
 		ArrayList<DbEvent> list = new ArrayList<DbEvent>();
@@ -136,8 +137,28 @@ public class DB {
 			list.add(ee);}
 		DbEvent[] result = new DbEvent[list.size()];
 		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
-		if(ENABLEDEBUG) System.out.flush();
 		return result;
+	}
+	static DbEvent TranslateDbEvent(ResultSet myRs)
+	throws SQLException
+	{
+		myRs.next();
+		int i = 1; 
+		DbEvent ee          = new DbEvent();
+		ee.id             = myRs.getInt(i++);
+		ee.id_cat         = myRs.getInt(i++);
+		ee.id_instructor  = myRs.getInt(i++);
+		ee.name           = myRs.getString(i++);
+		ee.description    = myRs.getString(i++);
+		ee.when_days      = myRs.getString(i++);
+		ee.when_beg       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
+		ee.when_end       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
+		ee.cost_cents     = myRs.getInt(i++);
+		ee.link           = myRs.getString(i++);
+		ee.calendar_id    = myRs.getString(i++);
+		ee.status         = myRs.getString(i++);
+		ee.last_updated   = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
+		return ee;
 	}
 	static DbEvent[] GetEventsWhere(DbEvent e)
 	throws SQLException
@@ -155,7 +176,6 @@ public class DB {
 		myStmt1.setInt      (x++, e._cost_cents_max);
 		myStmt1.setInt      (x++, e._cat_fit);
 		myStmt1.setInt      (x++, e._cat_impr);
-		if(ENABLEDEBUG) System.out.println(myStmt1);
 		myStmt1.execute();
 		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
 		ArrayList<DbEvent> list = new ArrayList<DbEvent>();
@@ -177,18 +197,11 @@ public class DB {
 			list.add(ee);}
 		DbEvent[] result = new DbEvent[list.size()];
 		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
-		if(ENABLEDEBUG) System.out.flush();
 		return result;
 	}
-	static UserEvent[] GetUserEvents(User u)
+	static UserEvent[] TranslateUserEvents(ResultSet myRs)
 	throws SQLException
 	{
-		CallableStatement myStmt1 = c.prepareCall("{call GetUserEvents(?, ?)}"); int x = 1;
-		myStmt1.setInt      (x++, u.id);
-		myStmt1.setBytes    (x++, u.login_token);
-		if(ENABLEDEBUG) System.out.println(myStmt1);
-		myStmt1.execute();
-		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
 		ArrayList<UserEvent> list = new ArrayList<UserEvent>();
 		while(myRs.next()){ int i = 1;
 			UserEvent ue     = new UserEvent();
@@ -203,35 +216,42 @@ public class DB {
 			list.add(ue);}
 		UserEvent[] result = new UserEvent[list.size()];
 		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
-		if(ENABLEDEBUG) System.out.flush();
 		return result;
+	}
+	static UserEvent[] GetUserEvents(User u)
+	throws SQLException
+	{
+		CallableStatement myStmt1 = c.prepareCall("{call GetUserEvents(?, ?)}"); int x = 1;
+		myStmt1.setInt      (x++, u.id);
+		myStmt1.setBytes    (x++, u.login_token);
+		myStmt1.execute();
+		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
+		return TranslateUserEvents(myRs);
 	}
 	static User NewUser(User u) //Returns the completed User Structure.
 	throws SQLException
 	{
-		CallableStatement myStmt1 = c.prepareCall("{call NewUser(?, ?, ?, ?, ?, ?)}"); int x = 1;
-		myStmt1.setBoolean  (x++, u.is_staffmember);
-		myStmt1.setBoolean  (x++, u.is_instructor);
-		myStmt1.setBytes    (x++, u.googleid);
-		myStmt1.setBytes    (x++, u.passhash);
-		myStmt1.setBytes    (x++, u.authtoken);
+		CallableStatement myStmt1 = c.prepareCall("{call NewUser(?, ?)}"); int x = 1;
+		myStmt1.setString   (x++, u.googleid);
+		myStmt1.setString   (x++, u.google_email);
 		myStmt1.setString   (x++, u.username);
-		if(ENABLEDEBUG) System.out.println(myStmt1);
 		myStmt1.execute();
 		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
+		return TranslateUser(myRs);
+	}
+	static User TranslateUser(ResultSet myRs)
+	throws SQLException
+	{
 		int i = 1;
 		myRs.next();
 		User uu           = new User();
 		uu.id             = myRs.getInt(i++);
 		uu.is_staffmember = myRs.getBoolean(i++);
 		uu.is_instructor  = myRs.getBoolean(i++);
-		uu.googleid       = myRs.getBytes(i++);
-		uu.passhash       = myRs.getBytes(i++);
-		uu.authtoken      = myRs.getBytes(i++);
+		uu.googleid       = myRs.getString(i++);
+		uu.google_email   = myRs.getString(i++);
 		uu.username       = myRs.getString(i++);
 		uu.login_token    = myRs.getBytes(i++);//Filled Value Required for User Interactivity Verification
-		if(ENABLEDEBUG) System.out.println("Created the account " + uu.id + " " + uu.username + "\n");
-		if(ENABLEDEBUG) System.out.flush();
 		return uu;
 	}
 	static void DelUser(User u)
@@ -241,10 +261,7 @@ public class DB {
 		CallableStatement myStmt1 = c.prepareCall("{call DeleteLoggedInUser(?, ?)}"); int x = 1;
 		myStmt1.setInt      (x++, u.id);
 		myStmt1.setBytes    (x++, u.login_token);
-		if(ENABLEDEBUG) System.out.println(myStmt1);
 		myStmt1.execute();
-		if(ENABLEDEBUG) System.out.println("Deleted the account " + u.id + " " + u.username + ".\n");
-		if(ENABLEDEBUG) System.out.flush();
 	}
 	static UserEvent NewUserEvent(UserEvent e, User u)
 	throws SQLException
@@ -259,7 +276,6 @@ public class DB {
 		myStmt1.setTimestamp(x++, e.notify_when);
 		myStmt1.setInt      (x++, u.id);
 		myStmt1.setBytes    (x++, u.login_token);
-		if(ENABLEDEBUG) System.out.println(myStmt1);
 		myStmt1.execute();
 		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
 		int i = 1;
@@ -273,8 +289,6 @@ public class DB {
 		ue.defined_name   = myRs.getString(i++);
 		ue.notify         = myRs.getBoolean(i++);
 		ue.notify_when    = myRs.getTimestamp(i++);
-		if(ENABLEDEBUG) System.out.println("Created a New User Event " + ue.id + " for " + u.id + " " + u.username + ".\n");
-		if(ENABLEDEBUG) System.out.flush();
 		return ue;
 	}
 	static void DelUserEvent(UserEvent e, User u)
@@ -285,10 +299,7 @@ public class DB {
 		myStmt1.setInt      (x++, e.id);
 		myStmt1.setInt      (x++, u.id);
 		myStmt1.setBytes    (x++, u.login_token);
-		if(ENABLEDEBUG) System.out.println(myStmt1);
 		myStmt1.execute();
-		if(ENABLEDEBUG) System.out.println("The User Event " + e.id + " for " + u.username + " Was Deleted\n");
-		if(ENABLEDEBUG) System.out.flush();
 	}
 	static void DelUserEvents(User u)
 	throws SQLException
@@ -297,16 +308,43 @@ public class DB {
 		CallableStatement myStmt1 = c.prepareCall("{call DeleteLoggedInUserEvents(?, ?)}"); int x = 1;
 		myStmt1.setInt      (x++, u.id);
 		myStmt1.setBytes    (x++, u.login_token);
-		if(ENABLEDEBUG) System.out.println(myStmt1);
 		myStmt1.execute();
-		if(ENABLEDEBUG) System.out.println("All User Events for " + u.username + " Deleted\n");
-		if(ENABLEDEBUG) System.out.flush();
 	}
-	static User LoginFunction(byte[] credentials)
+	static boolean LoginSubFunction(User uu)
 	throws SQLException
 	{
-		//NOT IMPLEMENTED, REQUIRES GOOGLE SIGNIN FUNCTIONALITY
-		return null;
+		//This enables checking the database to check for a user existing - if not an account can be created.
+		CallableStatement myStmt1 = c.prepareCall("{call LoginFunction(?)}"); int x = 1;
+		myStmt1.setString   (x++, uu.googleid);
+		myStmt1.execute();
+		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
+		int i = 1;
+		if(!myRs.next()) return false; //If empty, user doesn't exist.
+		return true;
+	}
+	static User Login(User u)
+	throws SQLException
+	{
+		//the login function only needs the authenticated Google ID and username filled in.
+		/** If the user doesn't exist it will be created and returned.*/
+		if(!LoginSubFunction(u)){
+			return NewUser(u);
+		}
+		CallableStatement myStmt1 = c.prepareCall("{call LoginFunction(?)}"); int x = 1;
+		myStmt1.setString   (x++, u.googleid);
+		myStmt1.execute();
+		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
+		int i = 1;
+		myRs.next();
+		User uu           = new User();
+		uu.id             = myRs.getInt(i++);
+		uu.is_staffmember = myRs.getBoolean(i++);
+		uu.is_instructor  = myRs.getBoolean(i++);
+		uu.googleid       = myRs.getString(i++);
+		uu.google_email   = myRs.getString(i++);
+		uu.username       = myRs.getString(i++);
+		uu.login_token    = myRs.getBytes(i++);//Filled Value Required for User Interactivity Verification
+		return uu;
 	}
 	
 	
@@ -327,15 +365,13 @@ public class DB {
 			uu.id             = myRs.getInt(i++);
 			uu.is_staffmember = myRs.getBoolean(i++);
 			uu.is_instructor  = myRs.getBoolean(i++);
-			uu.googleid       = myRs.getBytes(i++);
-			uu.passhash       = myRs.getBytes(i++);
-			uu.authtoken      = myRs.getBytes(i++);
+			uu.googleid       = myRs.getString(i++);
+			uu.google_email   = myRs.getString(i++);
 			uu.username       = myRs.getString(i++);
 			uu.login_token    = myRs.getBytes(i++);//Filled Value Required for User Interactivity Verification
 			list.add(uu);}
 		User[] result = new User[list.size()];
 		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
-		if(ENABLEDEBUG) System.out.flush();
 		return result;
 	}
 	static void        AdminDelEventCat(EventCat ec)
@@ -382,8 +418,7 @@ public class DB {
 	{
 		ExecuteSQL("UPDATE users SET"+
 	      " IsStaffMember = "+uu.is_staffmember+
-		  ", IsInstructor = "+uu.is_instructor+
-		      ", Username = "+uu.username+
+		  ", IsInstructor = "+uu.is_instructor+ //CANNOT EDIT USERNAME OR EMAIL, THESE ARE AUTOMATIC.
    " WHERE cats_event.id = "+uu.id+";");
 		return uu;
 	}
@@ -417,12 +452,12 @@ public class DB {
 		 " WHERE cats_impr.id = "+ic.id+";");
 		return ic;
 	}
-	static void        AdminDoMassNotify()
+	static void        AdminDoMassNotify(String subject, String message)
 	throws SQLException
 	{
 		User[] ua = AdminGetUsers();
 		for(int i = ua.length-1; i >= 0; i--){
-			NotifyGoogleUser(ua[i]);
+			NotifyGoogleUser(ua[i], subject, message);
 		}
 		return;
 	}
@@ -436,15 +471,13 @@ public class DB {
 			uu.id             = myRs.getInt(i++);
 			uu.is_staffmember = myRs.getBoolean(i++);
 			uu.is_instructor  = myRs.getBoolean(i++);
-			uu.googleid       = myRs.getBytes(i++);
-			uu.passhash       = myRs.getBytes(i++);
-			uu.authtoken      = myRs.getBytes(i++);
+			uu.googleid       = myRs.getString(i++);
+			uu.google_email   = myRs.getString(i++);
 			uu.username       = myRs.getString(i++);
 			uu.login_token    = myRs.getBytes(i++);//Filled Value Required for User Interactivity Verification
 			list.add(uu);}
 		User[] result = new User[list.size()];
 		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
-		if(ENABLEDEBUG) System.out.flush();
 		return result;
 	}
 	static DbEvent[]   AdminGetUser_HasEvents_List(DbEvent e)
@@ -470,63 +503,49 @@ public class DB {
 			list.add(ee);}
 		DbEvent[] result = new DbEvent[list.size()];
 		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
-		if(ENABLEDEBUG) System.out.flush();
 		return result;
 	}
-	static void NotifyGoogleUser(User u)
+	static void NotifyGoogleUser(User u, String subject, String message)
 	{
-		
+		String to = u.google_email;
+		String from = "reccntr@siu.edu";
+		SendEmailNotification(to, from, subject, message);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	/**
-	
-	static DbEvent[] AdminGetUsers_()
+	static void CheckUserEvents_DoNotifications()
 	throws SQLException
 	{
-		CallableStatement myStmt1 = c.prepareCall("{call GetEvents()}");
-		if(ENABLEDEBUG) System.out.println(myStmt1);
-		myStmt1.execute();
-		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
-		ArrayList<DbEvent> list = new ArrayList<DbEvent>();
-		while(myRs.next()){ int i = 1; 
-			DbEvent ee          = new DbEvent();
-			ee.id             = myRs.getInt(i++);
-			ee.id_cat         = myRs.getInt(i++);
-			ee.id_instructor  = myRs.getInt(i++);
-			ee.name           = myRs.getString(i++);
-			ee.description    = myRs.getString(i++);
-			ee.when_days      = myRs.getString(i++);
-			ee.when_beg       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
-			ee.when_end       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
-			ee.cost_cents     = myRs.getInt(i++);
-			ee.link           = myRs.getString(i++);
-			ee.calendar_id    = myRs.getString(i++);
-			ee.status         = myRs.getString(i++);
-			ee.last_updated   = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
-			list.add(ee);}
-		DbEvent[] result = new DbEvent[list.size()];
-		for(int i = 0; i < list.size(); i++) result[i] = list.get(i);
-		if(ENABLEDEBUG) System.out.flush();
-		return result;
+		/**####################################################*/
+		/** Uses email address to send notifications by email. */
+		ResultSet rs = ExecuteSQL("select distinct userevents.* from users, userevents, events_ where userevents.notify = true and NotifyWhen < NOW();");
+		UserEvent[] ue_array = TranslateUserEvents(rs);
+		for(int ue = 0; ue < ue_array.length; ue++){
+			ExecuteSQL("update userevents set userevents.notify = false where userevents.id = "+ue_array[ue].id+";");
+			ResultSet rsu = ExecuteSQL("select distinct users.* where users.id = "+ue_array[ue].id_user+";");
+			ResultSet rse = ExecuteSQL("select distinct events_.* where events_.id = "+ue_array[ue].id_event+";");
+			User ux = TranslateUser(rsu);
+			DbEvent ex = TranslateDbEvent(rse);
+			String subject = "(Rec Center) REMINDER!! "+ex.name; 
+			String message = "REMINDER!! \r\n"+ex.name+"\r\nIs about to proceed at The Rec Center.";
+			String to = ux.google_email;
+			String from = "reccntr@siu.edu";
+			SendEmailNotification(to, from, subject, message);
+		}
 	}
-	
-	*/
-	
-	
-	
-	
-	
-	
+	public static void SendEmailNotification(String to, String from, String subject, String message)
+	{    
+	   String host = "localhost";
+	   Properties properties = System.getProperties();
+	   properties.setProperty("mail.smtp.host", host);
+	   Session session = Session.getDefaultInstance(properties);
+	   try{
+	      MimeMessage m = new MimeMessage(session);
+	      m.setFrom(new InternetAddress(from));
+	      m.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+	      m.setSubject(subject);
+	      m.setText(message);
+	      Transport.send(m);
+	   }catch(MessagingException e){
+	      e.printStackTrace();
+	   }
+	}
 }
