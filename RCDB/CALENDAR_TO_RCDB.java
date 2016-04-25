@@ -1,3 +1,9 @@
+import java.sql.*;
+import java.io.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -12,15 +18,15 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
 
-import java.io.*;
-import java.util.Arrays;
-import java.util.List;
-import java.sql.SQLException;
-import java.sql.DriverManager;
-import java.sql.Connection;
-import java.sql.Statement;
-
 public class CALENDAR_TO_RCDB {
+	
+	public static String[] monthname = {"January", "Febuary", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+	public static String[] dayname = {"Monday", "Tuesday", "Wedneday", "Thursday", "Friday", "Saturday", "Sunday"};
+	public static String[] daypostfix = {"th","st","nd","rd","th","th","th","th","th","th",
+										 "th","th","th","th","th","th","th","th","th","th",
+										 "th","st","nd","rd","th","th","th","th","th","th",
+										 "th","st","nd","rd","th","th","th","th","th","th"};
+	
 	public static int     UPDATE_CHECK_TIME = 1000;//30000
 	
 	private static final String         CLIENT_SECRET_PATH = "libs/client_secret.json";              /**CHANGED TEMPORARILY TO A FOLDER INSIDE THE DEVELOPMENT FOLDER was user.home*/
@@ -48,6 +54,19 @@ public class CALENDAR_TO_RCDB {
     	java.util.Calendar c = java.util.Calendar.getInstance();
     	DateTime d = new DateTime(c.getTime());
     	return d;
+    }
+    public static java.sql.Timestamp GoogleDateTimeToSqlTimestamp(DateTime d)
+    {
+    	String rfc3339v = d.toStringRfc3339();//2002-10-02T10:00:00
+    	       rfc3339v = (rfc3339v.substring(0, 10)+' '+rfc3339v.substring(11,18));//meets format yyyy-[m]m-[d]d hh:mm:ss[.f...]
+    	return java.sql.Timestamp.valueOf(rfc3339v);
+    }
+    public static String SqlTimestampToDateString(java.sql.Timestamp d)
+    {
+    	long timestamp = d.getTime();
+		java.util.Calendar cal = java.util.Calendar.getInstance(); cal.setTimeInMillis(timestamp);
+		String s = dayname[cal.get(java.util.Calendar.DAY_OF_WEEK)-1]+", "+monthname[cal.get(java.util.Calendar.MONTH)]+" "+cal.get(java.util.Calendar.DATE)+daypostfix[cal.get(java.util.Calendar.DATE)];
+		return s;
     }
     public static Credential authorize()
     throws Exception
@@ -116,11 +135,46 @@ public class CALENDAR_TO_RCDB {
     throws SQLException
     {
     	for(Event event : items){
-        	
-    		
-    		
-    		
-    		
+    		DbEvent ee        = new DbEvent();
+			ee.name           = event.getSummary();
+			ee.description    = event.getDescription();
+			ee.when_beg       = GoogleDateTimeToSqlTimestamp(event.getStart().getDateTime());
+			ee.when_end       = GoogleDateTimeToSqlTimestamp(event.getEnd().getDateTime());
+			ee.link           = event.getHtmlLink();
+			ee.calendar_id    = event.getId();
+			ee.status         = event.getStatus();
+			ee.last_updated   = GoogleDateTimeToSqlTimestamp(event.getUpdated());
+			/** Automatic days of week handler!! */
+			ee.when_day       = SqlTimestampToDateString(GoogleDateTimeToSqlTimestamp(event.getStart().getDateTime()));
+			/** Automatic fields based on description text!! */
+			//At the end of the description, place the following:
+			//Instructor[KeyText]	to set Instructor (uses Google DisplayName in Database Entries)
+			//Category[KeyText]		to set Event Category (uses Database Entries)
+			//Cost[$123.45]			to set Cost amount (cents cannot be omitted)
+			String s = ee.description;
+			Pattern p = Pattern.compile("Instructor:\\[[a-zA-Z]*?\\]");
+			Pattern q = Pattern.compile("Category:\\[[a-zA-Z]*?\\]");
+			Pattern r = Pattern.compile("Cost:\\[\\$[0-9]*?\\.[0-9]*?\\]");
+			if(r.matcher(s).find()){
+				String s0 = s.substring(p.matcher(s).start(), p.matcher(s).end());
+				ee.cost_cents = (int)(Double.valueOf(s0.substring(7,s0.length()-1)) * 100.0);
+			}
+			if(p.matcher(s).find())
+			{
+				String s0 = s.substring(p.matcher(s).start(), p.matcher(s).end());
+				s0 = s0.substring(12,s0.length()-1);
+				User uu = DB.AdminFindInstructorUser(s0);
+				ee.id_instructor  = uu.id;
+			}
+			if(q.matcher(s).find())
+			{
+				String s0 = s.substring(p.matcher(s).start(), p.matcher(s).end());
+				s0 = s0.substring(10,s0.length()-1);
+				EventCat ec = DB.AdminFindEventCategory(s0);
+				ee.id_cat         = ec.id;
+			}
+			DB.UpdateEventFromCalendar(ee);
+			System.out.println("EventUpdateCompleted();");
         }
     }
 }

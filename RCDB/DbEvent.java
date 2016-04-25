@@ -5,7 +5,7 @@ public class DbEvent implements ToString {
 	public int id_instructor;
 	public String name;
 	public String description;
-	public String when_days;
+	public String when_day;
 	public java.sql.Timestamp when_beg;
 	public java.sql.Timestamp when_end;
 	public int cost_cents;
@@ -30,7 +30,7 @@ public class DbEvent implements ToString {
 				calendar_id + " " + 
 				name + " " + 
 				description + " " + 
-				when_days + " " + 
+				when_day + " " + 
 				when_beg.toString() + " to " + 
 				when_end.toString() + " " + 
 				Integer.toString(cost_cents) + " Cents; Event is: " +
@@ -42,7 +42,7 @@ public class DbEvent implements ToString {
 		id_instructor = -1;
 		name = "NULL";
 		description = "NULL";
-		when_days = "NULL";
+		when_day = "NULL";
 		when_beg = null;
 		when_end = null;
 		cost_cents = -1;

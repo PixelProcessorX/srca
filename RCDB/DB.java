@@ -1,5 +1,6 @@
 import java.sql.*;
 import java.util.ArrayList;
+import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -126,7 +127,7 @@ public class DB {
 			ee.id_instructor  = myRs.getInt(i++);
 			ee.name           = myRs.getString(i++);
 			ee.description    = myRs.getString(i++);
-			ee.when_days      = myRs.getString(i++);
+			ee.when_day      = myRs.getString(i++);
 			ee.when_beg       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
 			ee.when_end       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
 			ee.cost_cents     = myRs.getInt(i++);
@@ -150,7 +151,7 @@ public class DB {
 		ee.id_instructor  = myRs.getInt(i++);
 		ee.name           = myRs.getString(i++);
 		ee.description    = myRs.getString(i++);
-		ee.when_days      = myRs.getString(i++);
+		ee.when_day      = myRs.getString(i++);
 		ee.when_beg       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
 		ee.when_end       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
 		ee.cost_cents     = myRs.getInt(i++);
@@ -186,7 +187,7 @@ public class DB {
 			ee.id_instructor  = myRs.getInt(i++);
 			ee.name           = myRs.getString(i++);
 			ee.description    = myRs.getString(i++);
-			ee.when_days      = myRs.getString(i++);
+			ee.when_day      = myRs.getString(i++);
 			ee.when_beg       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
 			ee.when_end       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
 			ee.cost_cents     = myRs.getInt(i++);
@@ -395,23 +396,35 @@ public class DB {
 		//Provides an override method so that administrators can just outright delete a user.
 		ExecuteSQL("delete from rcdb.users where id="+u.id);
 	}
-	static EventCat    AdminAddEventCat()
+	static EventCat    AdminAddEventCat(EventCat ec)
 	throws SQLException
 	{
-		ExecuteSQL("INSERT INTO cats_event (id, id_fit, `Name`, Description, Tags) VALUES (1, 1, 'Wieghtlifting', 'Lifting of various kinds.', 'Weights|Dumbells|lbs');");
-		return null;
+		ExecuteSQL("INSERT INTO cats_event (id_fit, `Name`, Description, Tags) VALUES ("+
+			" "+ ec.id_fit +","+
+			"'"+ ec.name +"',"+
+			"'"+ ec.description +"',"+
+			"'"+ ec.tags +"',"+
+			");");
+		return ec;
 	}
-	static Fitness     AdminAddFitCat()
+	static Fitness     AdminAddFitCat(Fitness fc)
 	throws SQLException
 	{
-		ExecuteSQL("INSERT INTO cats_fit (id, `Name`, Description) VALUES (1, 'Muscles', 'Improves muscle areas of the body.');");
-		return null;
+		ExecuteSQL("INSERT INTO cats_fit (`Name`, Description) VALUES ("+
+			"'"+ fc.name +"',"+
+			"'"+ fc.description +"',"+
+			");");
+		return fc;
 	}
-	static Improvement AdminAddImprCat()
+	static Improvement AdminAddImprCat(Improvement ic)
 	throws SQLException
 	{
-		ExecuteSQL("INSERT INTO cats_impr (id, id_fit, `Name`, Description) VALUES (1, 1, 'Muscles, Arm','Improves lifting performance.');");
-		return null;
+		ExecuteSQL("INSERT INTO cats_impr (id_fit, `Name`, Description) VALUES ("+
+				" "+ ic.id_fit +","+
+				"'"+ ic.name +"',"+
+				"'"+ ic.description +"',"+
+				");");
+		return ic;
 	}
 	static User        AdminEditUser(User uu)
 	throws SQLException
@@ -427,9 +440,9 @@ public class DB {
 	{
 		ExecuteSQL("UPDATE cats_event SET"+
 			     " id_fit = "+ec.id_fit+
-			     ", `Name`= "+ec.name+
-		   ", Description = "+ec.description+
-		          ", Tags = "+ec.tags+
+			     ", `Name`= '"+ec.name+"'"+
+		   ", Description = '"+ec.description+"'"+
+		          ", Tags = '"+ec.tags+"'"+
     " WHERE cats_event.id = "+ec.id+";");
 		return ec;
 	}
@@ -437,8 +450,8 @@ public class DB {
 	throws SQLException
 	{
 		ExecuteSQL("UPDATE cats_impr SET"+
-			     ", `Name`= "+fc.name+
-		   ", Description = "+fc.description+
+			     ", `Name`= '"+fc.name+"'"+
+		   ", Description = '"+fc.description+"'"+
 	 " WHERE cats_impr.id = "+fc.id+";");
 		return fc;
 	}
@@ -447,8 +460,8 @@ public class DB {
 	{
 		ExecuteSQL("UPDATE cats_impr SET"+
 				     " id_fit = "+ic.id_fit+
-				     ", `Name`= "+ic.name+
-			   ", Description = "+ic.description+
+				     ", `Name`= '"+ic.name+"'"+
+			   ", Description = '"+ic.description+"'"+
 		 " WHERE cats_impr.id = "+ic.id+";");
 		return ic;
 	}
@@ -492,7 +505,7 @@ public class DB {
 			ee.id_instructor  = myRs.getInt(i++);
 			ee.name           = myRs.getString(i++);
 			ee.description    = myRs.getString(i++);
-			ee.when_days      = myRs.getString(i++);
+			ee.when_day      = myRs.getString(i++);
 			ee.when_beg       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
 			ee.when_end       = myRs.getTimestamp(i++);//Must be '1900-01-01 00:00:00' or greater!
 			ee.cost_cents     = myRs.getInt(i++);
@@ -548,4 +561,107 @@ public class DB {
 	      e.printStackTrace();
 	   }
 	}
+	public static void SaveGoals(UserGoal[] data)
+	{
+		//THE DOCS SAY: On android user.home and user.name are pointless.
+		java.io.File path = new java.io.File(System.getProperty("user.dir"), "usergoals.bin");
+		try(ObjectOutputStream write= new ObjectOutputStream (new FileOutputStream(path))){
+	        write.writeInt(data.length);
+	        for(int i = 0; i < data.length; i++) write.writeObject(data[i]);
+	    }catch(NotSerializableException nse){
+	    	throw new IllegalStateException("UserGoals not Serializable?!!", nse);
+	    }catch(IOException eio){
+	    	throw new IllegalStateException("Error Saving User Goals!!", eio);
+	    }
+	}
+	public static UserGoal[] LoadGoals()
+	{
+		//THE DOCS SAY: On android user.home and user.name are pointless.
+		java.io.File path = new java.io.File(System.getProperty("user.dir"), "usergoals.bin");
+		try(ObjectInputStream inFile = new ObjectInputStream(new FileInputStream(path))){
+	    	int sz = inFile.readInt();
+	    	UserGoal[] data = new UserGoal[sz];
+	    	for(int i = 0; i < sz; i++) data[i] = (UserGoal)inFile.readObject();
+	        return data;
+	    }catch(ClassNotFoundException cnfe){
+	    	return null;
+	    }catch(FileNotFoundException fnfe){
+	    	return null;
+	    }catch(IOException e){
+	    	return null;
+	    }
+	}
+	static User AdminFindInstructorUser(String find)
+	throws SQLException
+	{
+		ResultSet myRs = ExecuteSQL("SELECT DISTINCT users.* WHERE (users.Username LIKE '%"+find+"%') LIMIT 1;");
+		if(!myRs.next()) return null;
+		int i = 1;
+		User uu           = new User();
+		uu.id             = myRs.getInt(i++);
+		uu.is_staffmember = myRs.getBoolean(i++);
+		uu.is_instructor  = myRs.getBoolean(i++);
+		uu.googleid       = myRs.getString(i++);
+		uu.google_email   = myRs.getString(i++);
+		uu.username       = myRs.getString(i++);
+		uu.login_token    = myRs.getBytes(i++);
+		return uu;
+	}
+	static EventCat AdminFindEventCategory(String find)
+	throws SQLException
+	{
+		ResultSet myRs = ExecuteSQL("SELECT DISTINCT cats_event.* WHERE (cats_event.`Name` LIKE '%"+find+"%') LIMIT 1;");
+		if(!myRs.next()) return null;
+		int i = 1;
+		EventCat ec       = new EventCat();
+		ec.id             = myRs.getInt(i++);
+		ec.id_fit         = myRs.getInt(i++);
+		ec.name           = myRs.getString(i++);
+		ec.description    = myRs.getString(i++);
+		ec.tags           = myRs.getString(i++);
+		return ec;
+	}
+	static void  UpdateEventFromCalendar(DbEvent ev)
+	throws SQLException
+	{
+		ResultSet myRs = ExecuteSQL("SELECT DISTINCT events_.* WHERE (events_.CalendarID = '"+ev.calendar_id+"') LIMIT 1;");
+		if(!myRs.next()){
+			//Add the event.
+			ExecuteSQL("INSERT INTO events_ (id_cat, id_instructor, `Name`, Description, WhenDay, WhenBeg, WhenEnd, CostCents, HtmlLink, CalendarID, Status, CalendarLastUpd) VALUES ("+
+				" "+ ev.id_cat +","+
+				" "+ ev.id_instructor +","+
+				"'"+ ev.name +"',"+
+				"'"+ ev.description +"',"+
+				"'"+ ev.when_day +"',"+
+				"'"+ ev.when_beg +"',"+
+				"'"+ ev.when_end +"',"+
+				" "+ ev.cost_cents +","+
+				"'"+ ev.link +"',"+
+				"'"+ ev.calendar_id +"',"+
+				"'"+ ev.status +"',"+
+				"'"+ ev.last_updated +"'"+
+				");");
+			return;
+		}
+		ExecuteSQL("UPDATE cats_impr SET"+
+			"id_cat =  "+ ev.id_cat +","+
+			"id_instructor = "+ ev.id_instructor +","+
+			"`Name` = '"+ ev.name +"',"+
+			"Description = '"+ ev.description +"',"+
+			"WhenDay = '"+ ev.when_day +"',"+
+			"WhenBeg = '"+ ev.when_beg +"',"+
+			"WhenEnd = '"+ ev.when_end +"',"+
+			"CostCents = "+ ev.cost_cents +","+
+			"HtmlLink = '"+ ev.link +"',"+
+			"Status = '"+ ev.status +"',"+
+			"CalendarLastUpd = '"+ ev.last_updated +"'"+
+			"WHERE events_.calendar_id = '"+ev.calendar_id+"');");
+	}
 }
+
+
+
+
+
+
+

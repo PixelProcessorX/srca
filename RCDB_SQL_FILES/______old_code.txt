@@ -2,7 +2,14 @@
     	
 	
 	
-	
+	DateTime now = new DateTime(0);
+         Events events2 = service.events().list("primary")
+             .setMaxResults(30)
+             .setTimeMin(now)
+             .setOrderBy("startTime")
+             .setSingleEvents(true)
+             .execute();
+        List<Event> items2 = events2.getItems();
 	
 	
 	
