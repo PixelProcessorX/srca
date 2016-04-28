@@ -651,14 +651,43 @@ public class DB {
 		ec.tags           = myRs.getString(i++);
 		return ec;
 	}
-	static void  UpdateEventFromCalendar(DbEvent ev)
-	throws SQLException
+	static int UpdateEventFromCalendar(DbEvent ev)
+	throws SQLException //Returns [-1 for Delete, 0 for No Action, 1 for Insert, 2 for Update]
 	{
-		ResultSet myRs = ParamizedExecSQL("SELECT DISTINCT events_.* FROM events_ WHERE (events_.CalendarID = ?) LIMIT 1;",ev.calendar_id);
-		if(!myRs.next()){
-			//Add the event.
-			ParamizedExecSQL("INSERT INTO events_ (id_cat, id_instructor, `Name`, Description, WhenDay, WhenBeg, WhenEnd, CostCents, HtmlLink, CalendarID, Status, CalendarLastUpd) "+
-							 "VALUES (?,?,?,?,?,?,?,?,?,?,?,?);",
+		ResultSet myRs = ParamizedExecSQL("SELECT DISTINCT events_.* FROM events_ WHERE (events_.CalendarID = ?) LIMIT 1;", ev.calendar_id);
+		if(myRs.next()){
+			//If the record exists...
+			myRs.previous();
+			DbEvent record = DB.TranslateDbEvent(myRs);
+			myRs.previous();
+			if(record.compareEqual(ev)) return 0;
+			//If it's different...
+			if((ev.when_beg == null) && (ev.when_end == null)){
+				//DELETED EVENT!!!
+				ParamizedExecSQL("DELETE FROM events_ WHERE events_.CalendarID = ?;", ev.calendar_id);
+				return -1;
+			}
+		}
+		if((ev.when_beg != null) && (ev.when_end != null)){
+			if(!myRs.next()){
+				//Add the event.
+				ParamizedExecSQL("INSERT INTO events_ (id_cat, id_instructor, `Name`, Description, WhenDay, WhenBeg, WhenEnd, CostCents, HtmlLink, CalendarID, Status, CalendarLastUpd) "+
+								 "VALUES (?,?,?,?,?,?,?,?,?,?,?,?);",
+					ev.id_cat,
+					ev.id_instructor,
+					ev.name,
+					ev.description,
+					ev.when_day,
+					ev.when_beg,
+					ev.when_end,
+					ev.cost_cents,
+					ev.link,
+					ev.calendar_id,
+					ev.status,
+					ev.last_updated);
+				return 1;
+			}
+			ParamizedExecSQL("UPDATE events_ SET id_cat = ?, id_instructor = ?, `Name` = ?, Description = ?, WhenDay = ?, WhenBeg = ?, WhenEnd = ?, CostCents = ?, HtmlLink = ?, Status = ?, CalendarLastUpd = ? WHERE events_.CalendarID = ?;",
 				ev.id_cat,
 				ev.id_instructor,
 				ev.name,
@@ -668,24 +697,13 @@ public class DB {
 				ev.when_end,
 				ev.cost_cents,
 				ev.link,
-				ev.calendar_id,
 				ev.status,
-				ev.last_updated);
-			return;
+				ev.last_updated,
+				ev.calendar_id);
+			return 2;
+		}else{
+			return 0;
 		}
-		ParamizedExecSQL("UPDATE cats_impr SET id_cat = ?, id_instructor = ?, `Name` = ?, Description = ?, WhenDay = ?, WhenBeg = ?, WhenEnd = ?, CostCents = ?, HtmlLink = ?, Status = ?, CalendarLastUpd = ?, WHERE events_.CalendarID = ?;",
-			ev.id_cat,
-			ev.id_instructor,
-			ev.name,
-			ev.description,
-			ev.when_day,
-			ev.when_beg,
-			ev.when_end,
-			ev.cost_cents,
-			ev.link,
-			ev.status,
-			ev.last_updated,
-			ev.calendar_id);
 	}
 }
 

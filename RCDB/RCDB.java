@@ -53,7 +53,7 @@ public class RCDB
 		static void DelUserEvents(User u)
 		*/
 		
-		DbEvent ee = new DbEvent(); 
+		/**DbEvent ee = new DbEvent(); 
 		Fitness ff = new Fitness(); 
 		Improvement ii = new Improvement(); 
 		EventCat cc = new EventCat(); 
@@ -84,7 +84,7 @@ public class RCDB
 		
 		DB.DelUser(uu);
 		DB.DelUserEvent(ue, uu);
-		DB.DelUserEvents(uu);
+		DB.DelUserEvents(uu);*/
 		
 		
 		

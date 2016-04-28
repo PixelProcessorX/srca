@@ -56,4 +56,19 @@ public class DbEvent implements ToString {
 		_cat_impr = -1;
 		last_updated = null;
 	}
+	public boolean compareEqual(DbEvent d){
+		return (
+			(id_cat == d.id_cat) &&
+			(id_instructor == d.id_instructor) &&
+			(name.equals(d.name)) &&
+			(description.equals(d.description)) &&
+			(when_day.equals(d.when_day)) &&
+			(when_beg.getTime() == d.when_beg.getTime()) && //MUST USE TIME INTEGER OR COMPARE FAILS
+			(when_end.getTime() == d.when_end.getTime()) && //MUST USE TIME INTEGER OR COMPARE FAILS
+			(cost_cents == d.cost_cents) &&
+			(link.equals(d.link)) &&
+			(calendar_id.equals(calendar_id)) &&
+			(status.equals(d.status)) &&
+			(last_updated.getTime() == d.last_updated.getTime())); //MUST USE TIME INTEGER OR COMPARE FAILS
+	}
 }

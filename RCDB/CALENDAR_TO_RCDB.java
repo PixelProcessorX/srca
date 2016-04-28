@@ -62,6 +62,7 @@ public class CALENDAR_TO_RCDB {
     }
     public static java.sql.Timestamp GoogleDateTimeToSqlTimestamp(DateTime d)
     {
+    	if(d == null) return null;
     	String rfc3339v = d.toStringRfc3339();//2002-10-02T10:00:00
     	       rfc3339v = (rfc3339v.substring(0, 10)+' '+rfc3339v.substring(11,18));//meets format yyyy-[m]m-[d]d hh:mm:ss[.f...]
     	return java.sql.Timestamp.valueOf(rfc3339v);
@@ -116,6 +117,8 @@ public class CALENDAR_TO_RCDB {
     	/**####################################################################################*/
         /** THIS IS AN UPDATE LOOP THAT UPDATES THE CALENDAR WITH NEW EVENTS EVENT 30 SECONDS. */
     	/**####################################################################################*/
+    	System.out.println("Running Check Cycles...");
+    	int line_counter = 0;
     	DateTime old_now = Now();
     	do{
     		Thread.sleep(UPDATE_CHECK_TIME);//30 seconds per update check.
@@ -133,7 +136,11 @@ public class CALENDAR_TO_RCDB {
     		DB.CheckUserEvents_DoNotifications();//Check the entire database for notifications to do!!
             credential.setRefreshToken(refresh_token);
             credential.refreshToken();
-            System.out.println("CheckCycle();");
+            System.out.print("%"); line_counter++;
+            if(line_counter == 128){
+            	System.out.println("");
+            	line_counter = 0;
+            }
     	}while(true);
     }
     static void TranslateUpdatedEventsToDatabase(List<Event> items)
@@ -143,14 +150,14 @@ public class CALENDAR_TO_RCDB {
     		DbEvent ee        = new DbEvent();
 			ee.name           = StripNullStrings(event.getSummary());
 			ee.description    = StripNullStrings(event.getDescription());
-			ee.when_beg       = GoogleDateTimeToSqlTimestamp(event.getStart().getDateTime());
-			ee.when_end       = GoogleDateTimeToSqlTimestamp(event.getEnd().getDateTime());
+			ee.when_beg       = ((event.getStart()!=null)?GoogleDateTimeToSqlTimestamp(event.getStart().getDateTime()):null);
+			ee.when_end       = ((event.getStart()!=null)?GoogleDateTimeToSqlTimestamp(event.getEnd().getDateTime()):null);
 			ee.link           = StripNullStrings(event.getHtmlLink());
 			ee.calendar_id    = StripNullStrings(event.getId());
 			ee.status         = event.getStatus();
 			ee.last_updated   = GoogleDateTimeToSqlTimestamp(event.getUpdated());
 			/** Automatic days of week handler!! */
-			ee.when_day       = SqlTimestampToDateString(GoogleDateTimeToSqlTimestamp(event.getStart().getDateTime()));
+			ee.when_day       = ((event.getStart()!=null)?SqlTimestampToDateString(GoogleDateTimeToSqlTimestamp(event.getStart().getDateTime())):"");
 			/** Automatic fields based on description text!! */
 			//At the end of the description, place the following:
 			//Instructor[KeyText]	to set Instructor (uses Google DisplayName in Database Entries)
@@ -178,8 +185,12 @@ public class CALENDAR_TO_RCDB {
 				EventCat ec = DB.AdminFindEventCategory(s0);
 				ee.id_cat         = ec.id;
 			}
-			DB.UpdateEventFromCalendar(ee);
-			System.out.println("EventUpdateCompleted("+ee.name+", "+ee.calendar_id+");");
+			switch(DB.UpdateEventFromCalendar(ee)){
+				case -1: System.out.println("\n[DELETE ITEM]:  \""+ee.calendar_id+"\""); break;
+				case  1: System.out.println("\nCreate:         \""+ee.calendar_id+"\",  \""+ee.name+"\""); break;
+				case  2: System.out.println("\nUPDATE:         \""+ee.calendar_id+"\",  \""+ee.name+"\""); break;
+			}
+			
         }
     }
 }
