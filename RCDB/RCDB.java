@@ -20,8 +20,21 @@ import java.util.ArrayList;
 public class RCDB
 {
 	public static void main(String[] args) {
+		/**java.sql.Timestamp t = new java.sql.Timestamp(0);
+		String s = "";
+		Integer i = 0;
+		Boolean b = false;
+		Byte[] bx = new Byte[100];
+		System.out.println(t.getClass().getName());
+		System.out.println(s.getClass().getName());
+		System.out.println(i.getClass().getName());
+		System.out.println(b.getClass().getName());
+		System.out.println(bx.getClass().getName());
+		System.out.println(bx.getClass().getName());*/
 		try{
 		Connection c = DB.ConnectToDatabase();
+		
+		
 		
 		
 		

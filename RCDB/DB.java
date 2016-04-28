@@ -35,16 +35,44 @@ public class DB {
 		    throw new IllegalStateException("Cannot connect the database!", e);
 		}
 	}
-	static protected ResultSet ExecuteSQL(String sql)
+	static byte[] ByteArray_To_byteArray(Byte[] oBytes)
+	{
+	    byte[] bytes = new byte[oBytes.length];
+	    for(int i = 0; i < oBytes.length; i++) {
+	        bytes[i] = oBytes[i];
+	    }
+	    return bytes;
+	}
+	static protected ResultSet ParamizedExecSQL(String sql, Object... args)
 	throws SQLException
 	{
-		try{
-			Statement s = c.createStatement();
-			s.executeQuery(sql);
-			return s.getResultSet();
-		}catch(Exception e){
-		    throw new IllegalStateException("Error Retrieving Records or Executing Query!!", e);
+		PreparedStatement stmt = c.prepareStatement(sql);
+		for(int p = 0; p < args.length; p++){
+			String n = args[p].getClass().getName();
+			switch(n){
+				case "java.sql.Timestamp":{
+					stmt.setTimestamp(p+1, ((java.sql.Timestamp)args[p]));
+				}break;
+				case "java.lang.String":{
+					stmt.setString(p+1, ((String)args[p]));
+				}break;
+				case "java.lang.Integer":{
+					stmt.setInt(p+1, ((Integer)args[p]).intValue());
+				}break;
+				case "java.lang.Boolean":{
+					stmt.setBoolean(p+1, ((Boolean)args[p]).booleanValue());
+				}break;
+				case "[Ljava.lang.Byte":{
+					stmt.setBytes(p+1, ByteArray_To_byteArray((Byte[])args[p]));
+				}break;
+			}
 		}
+		String t = sql.substring(0, 6).toUpperCase(); // Type of SQL command.
+		if(t.equals("INSERT") || t.equals("UPDATE") || t.equals("DELETE")){
+			stmt.executeUpdate();
+			return null;
+		}
+		return stmt.executeQuery();
 	}
 	static EventCat[] GetEventCategories(EventCat cc) 
 	throws SQLException
@@ -356,10 +384,15 @@ public class DB {
 	//###################################################################################################
 	//###################################################################################################
 	
+	
+	
+	
+	
+	
 	static User[]      AdminGetUsers()
 	throws SQLException
 	{
-		ResultSet myRs = ExecuteSQL("SELECT DISTINCT users.*");
+		ResultSet myRs = ParamizedExecSQL("SELECT DISTINCT users.* FROM users");
 		ArrayList<User> list = new ArrayList<User>();
 		while(myRs.next()){ int i = 1;
 			User uu           = new User();
@@ -378,91 +411,88 @@ public class DB {
 	static void        AdminDelEventCat(EventCat ec)
 	throws SQLException
 	{
-		ExecuteSQL("delete from rcdb.cats_event where id="+ec.id);
+		ParamizedExecSQL("delete from rcdb.cats_event where id=?", ec.id);
 	}
 	static  void       AdminDelFitCat(Fitness fc)
 	throws SQLException
 	{
-		ExecuteSQL("delete from rcdb.cats_fit where id="+fc.id);
+		ParamizedExecSQL("delete from rcdb.cats_fit where id=?", fc.id);
 	}
 	static void        AdminDelImprCat(Improvement ic)
 	throws SQLException
 	{
-		ExecuteSQL("delete from rcdb.cats_impr where id="+ic.id);
+		ParamizedExecSQL("delete from rcdb.cats_impr where id=?", ic.id);
 	}
 	static void        AdminDelUser(User u)
 	throws SQLException
 	{
 		//Provides an override method so that administrators can just outright delete a user.
-		ExecuteSQL("delete from rcdb.users where id="+u.id);
+		ParamizedExecSQL("delete from rcdb.users where id=?",u.id);
 	}
 	static EventCat    AdminAddEventCat(EventCat ec)
 	throws SQLException
 	{
-		ExecuteSQL("INSERT INTO cats_event (id_fit, `Name`, Description, Tags) VALUES ("+
-			" "+ ec.id_fit +","+
-			"'"+ ec.name +"',"+
-			"'"+ ec.description +"',"+
-			"'"+ ec.tags +"',"+
-			");");
+		ParamizedExecSQL("INSERT INTO cats_event (id_fit, `Name`, Description, Tags) VALUES (?,?,?,?);",
+			ec.id_fit,
+			ec.name,
+			ec.description,
+			ec.tags);
 		return ec;
 	}
 	static Fitness     AdminAddFitCat(Fitness fc)
 	throws SQLException
 	{
-		ExecuteSQL("INSERT INTO cats_fit (`Name`, Description) VALUES ("+
-			"'"+ fc.name +"',"+
-			"'"+ fc.description +"',"+
-			");");
+		ParamizedExecSQL("INSERT INTO cats_fit (`Name`, Description) VALUES (?,?);",
+			fc.name,
+			fc.description);
 		return fc;
 	}
 	static Improvement AdminAddImprCat(Improvement ic)
 	throws SQLException
 	{
-		ExecuteSQL("INSERT INTO cats_impr (id_fit, `Name`, Description) VALUES ("+
-				" "+ ic.id_fit +","+
-				"'"+ ic.name +"',"+
-				"'"+ ic.description +"',"+
-				");");
+		ParamizedExecSQL("INSERT INTO cats_impr (id_fit, `Name`, Description) VALUES (?,?,?);",
+			ic.id_fit,
+			ic.name,
+			ic.description);
 		return ic;
 	}
 	static User        AdminEditUser(User uu)
 	throws SQLException
 	{
-		ExecuteSQL("UPDATE users SET"+
-	      " IsStaffMember = "+uu.is_staffmember+
-		  ", IsInstructor = "+uu.is_instructor+ //CANNOT EDIT USERNAME OR EMAIL, THESE ARE AUTOMATIC.
-   " WHERE cats_event.id = "+uu.id+";");
+		ParamizedExecSQL("UPDATE users SET IsStaffMember = ?, IsInstructor = ? WHERE cats_event.id = ?;",
+			uu.is_staffmember, 
+			uu.is_instructor, 
+			uu.id);
 		return uu;
 	}
 	static EventCat    AdminEditEventCat(EventCat ec)
 	throws SQLException
 	{
-		ExecuteSQL("UPDATE cats_event SET"+
-			     " id_fit = "+ec.id_fit+
-			     ", `Name`= '"+ec.name+"'"+
-		   ", Description = '"+ec.description+"'"+
-		          ", Tags = '"+ec.tags+"'"+
-    " WHERE cats_event.id = "+ec.id+";");
+		ParamizedExecSQL("UPDATE cats_event SET id_fit = ?, `Name`= ?, Description = ?, Tags = ? WHERE cats_event.id = ?;",
+			ec.id_fit, 
+			ec.name, 
+			ec.description, 
+			ec.tags, 
+			ec.id);
 		return ec;
 	}
 	static Fitness     AdminEditFitCat(Fitness fc)
 	throws SQLException
 	{
-		ExecuteSQL("UPDATE cats_impr SET"+
-			     ", `Name`= '"+fc.name+"'"+
-		   ", Description = '"+fc.description+"'"+
-	 " WHERE cats_impr.id = "+fc.id+";");
+		ParamizedExecSQL("UPDATE cats_impr SET `Name`= ?, Description = ? WHERE cats_impr.id = ?;",
+			fc.name, 
+			fc.description, 
+			fc.id);
 		return fc;
 	}
 	static Improvement AdminEditImprCat(Improvement ic)
 	throws SQLException
 	{
-		ExecuteSQL("UPDATE cats_impr SET"+
-				     " id_fit = "+ic.id_fit+
-				     ", `Name`= '"+ic.name+"'"+
-			   ", Description = '"+ic.description+"'"+
-		 " WHERE cats_impr.id = "+ic.id+";");
+		ParamizedExecSQL("UPDATE cats_impr SET id_fit = ?, `Name`= ?, Description = ? WHERE cats_impr.id = ?;",
+			ic.id_fit, 
+			ic.name, 
+			ic.description, 
+			ic.id);
 		return ic;
 	}
 	static void        AdminDoMassNotify(String subject, String message)
@@ -477,7 +507,7 @@ public class DB {
 	static User[]      AdminGetEvent_HasUsers_List(User u)
 	throws SQLException
 	{
-		ResultSet myRs = ExecuteSQL("SELECT DISTINCT users.* FROM users, events_, userevents WHERE (userevents.id_user = " + u.id + ");");
+		ResultSet myRs = ParamizedExecSQL("SELECT DISTINCT users.* FROM users, events_, userevents WHERE (userevents.id_user = ?);",u.id);
 		ArrayList<User> list = new ArrayList<User>();
 		while(myRs.next()){ int i = 1;
 			User uu           = new User();
@@ -496,7 +526,7 @@ public class DB {
 	static DbEvent[]   AdminGetUser_HasEvents_List(DbEvent e)
 	throws SQLException
 	{
-		ResultSet myRs = ExecuteSQL("SELECT DISTINCT events.* FROM users, events_, userevents WHERE (userevents.id_event = " + e.id + ");");
+		ResultSet myRs = ParamizedExecSQL("SELECT DISTINCT events.* FROM users, events_, userevents WHERE (userevents.id_event = ?);",e.id);
 		ArrayList<DbEvent> list = new ArrayList<DbEvent>();
 		while(myRs.next()){ int i = 1;
 			DbEvent ee          = new DbEvent();
@@ -529,12 +559,12 @@ public class DB {
 	{
 		/**####################################################*/
 		/** Uses email address to send notifications by email. */
-		ResultSet rs = ExecuteSQL("select distinct userevents.* from users, userevents, events_ where userevents.notify = true and NotifyWhen < NOW();");
+		ResultSet rs = ParamizedExecSQL("select distinct userevents.* from users, userevents, events_ where userevents.notify = true and NotifyWhen < NOW();");
 		UserEvent[] ue_array = TranslateUserEvents(rs);
 		for(int ue = 0; ue < ue_array.length; ue++){
-			ExecuteSQL("update userevents set userevents.notify = false where userevents.id = "+ue_array[ue].id+";");
-			ResultSet rsu = ExecuteSQL("select distinct users.* where users.id = "+ue_array[ue].id_user+";");
-			ResultSet rse = ExecuteSQL("select distinct events_.* where events_.id = "+ue_array[ue].id_event+";");
+			ParamizedExecSQL("update userevents set userevents.notify = false where userevents.id = ?;",ue_array[ue].id);
+			ResultSet rsu = ParamizedExecSQL("select distinct users.* where users.id = ?;",ue_array[ue].id_user);
+			ResultSet rse = ParamizedExecSQL("select distinct events_.* where events_.id = ?;",ue_array[ue].id_event);
 			User ux = TranslateUser(rsu);
 			DbEvent ex = TranslateDbEvent(rse);
 			String subject = "(Rec Center) REMINDER!! "+ex.name; 
@@ -594,7 +624,7 @@ public class DB {
 	static User AdminFindInstructorUser(String find)
 	throws SQLException
 	{
-		ResultSet myRs = ExecuteSQL("SELECT DISTINCT users.* WHERE (users.Username LIKE '%"+find+"%') LIMIT 1;");
+		ResultSet myRs = ParamizedExecSQL("SELECT DISTINCT users.* FROM users WHERE (users.Username LIKE '%?%') LIMIT 1;",find);
 		if(!myRs.next()) return null;
 		int i = 1;
 		User uu           = new User();
@@ -610,7 +640,7 @@ public class DB {
 	static EventCat AdminFindEventCategory(String find)
 	throws SQLException
 	{
-		ResultSet myRs = ExecuteSQL("SELECT DISTINCT cats_event.* WHERE (cats_event.`Name` LIKE '%"+find+"%') LIMIT 1;");
+		ResultSet myRs = ParamizedExecSQL("SELECT DISTINCT cats_event.* FROM cats_event WHERE (cats_event.`Name` LIKE '%?%') LIMIT 1;",find);
 		if(!myRs.next()) return null;
 		int i = 1;
 		EventCat ec       = new EventCat();
@@ -624,38 +654,38 @@ public class DB {
 	static void  UpdateEventFromCalendar(DbEvent ev)
 	throws SQLException
 	{
-		ResultSet myRs = ExecuteSQL("SELECT DISTINCT events_.* WHERE (events_.CalendarID = '"+ev.calendar_id+"') LIMIT 1;");
+		ResultSet myRs = ParamizedExecSQL("SELECT DISTINCT events_.* FROM events_ WHERE (events_.CalendarID = ?) LIMIT 1;",ev.calendar_id);
 		if(!myRs.next()){
 			//Add the event.
-			ExecuteSQL("INSERT INTO events_ (id_cat, id_instructor, `Name`, Description, WhenDay, WhenBeg, WhenEnd, CostCents, HtmlLink, CalendarID, Status, CalendarLastUpd) VALUES ("+
-				" "+ ev.id_cat +","+
-				" "+ ev.id_instructor +","+
-				"'"+ ev.name +"',"+
-				"'"+ ev.description +"',"+
-				"'"+ ev.when_day +"',"+
-				"'"+ ev.when_beg +"',"+
-				"'"+ ev.when_end +"',"+
-				" "+ ev.cost_cents +","+
-				"'"+ ev.link +"',"+
-				"'"+ ev.calendar_id +"',"+
-				"'"+ ev.status +"',"+
-				"'"+ ev.last_updated +"'"+
-				");");
+			ParamizedExecSQL("INSERT INTO events_ (id_cat, id_instructor, `Name`, Description, WhenDay, WhenBeg, WhenEnd, CostCents, HtmlLink, CalendarID, Status, CalendarLastUpd) "+
+							 "VALUES (?,?,?,?,?,?,?,?,?,?,?,?);",
+				ev.id_cat,
+				ev.id_instructor,
+				ev.name,
+				ev.description,
+				ev.when_day,
+				ev.when_beg,
+				ev.when_end,
+				ev.cost_cents,
+				ev.link,
+				ev.calendar_id,
+				ev.status,
+				ev.last_updated);
 			return;
 		}
-		ExecuteSQL("UPDATE cats_impr SET"+
-			"id_cat =  "+ ev.id_cat +","+
-			"id_instructor = "+ ev.id_instructor +","+
-			"`Name` = '"+ ev.name +"',"+
-			"Description = '"+ ev.description +"',"+
-			"WhenDay = '"+ ev.when_day +"',"+
-			"WhenBeg = '"+ ev.when_beg +"',"+
-			"WhenEnd = '"+ ev.when_end +"',"+
-			"CostCents = "+ ev.cost_cents +","+
-			"HtmlLink = '"+ ev.link +"',"+
-			"Status = '"+ ev.status +"',"+
-			"CalendarLastUpd = '"+ ev.last_updated +"'"+
-			"WHERE events_.calendar_id = '"+ev.calendar_id+"');");
+		ParamizedExecSQL("UPDATE cats_impr SET id_cat = ?, id_instructor = ?, `Name` = ?, Description = ?, WhenDay = ?, WhenBeg = ?, WhenEnd = ?, CostCents = ?, HtmlLink = ?, Status = ?, CalendarLastUpd = ?, WHERE events_.CalendarID = ?;",
+			ev.id_cat,
+			ev.id_instructor,
+			ev.name,
+			ev.description,
+			ev.when_day,
+			ev.when_beg,
+			ev.when_end,
+			ev.cost_cents,
+			ev.link,
+			ev.status,
+			ev.last_updated,
+			ev.calendar_id);
 	}
 }
 

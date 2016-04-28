@@ -1,9 +1,9 @@
 
 public class Improvement implements ToString {
-	public int id;
-	public int id_fit;
-	public String name;
-	public String description;
+	public int id; /** SEARCH FIELD, KEEP -1 FOR SEARCH*/
+	public int id_fit; /** SEARCH FIELD*/
+	public String name; /** SEARCH FIELD*/
+	public String description; /** SEARCH FIELD*/
 	//===========================================================================
 	public String toString(){
 		return (Integer.toString(id) + " " + 

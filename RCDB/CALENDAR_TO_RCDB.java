@@ -55,6 +55,11 @@ public class CALENDAR_TO_RCDB {
     	DateTime d = new DateTime(c.getTime());
     	return d;
     }
+    public static String StripNullStrings(String s)
+    {
+    	if(s == null) return "";
+    	return s;
+    }
     public static java.sql.Timestamp GoogleDateTimeToSqlTimestamp(DateTime d)
     {
     	String rfc3339v = d.toStringRfc3339();//2002-10-02T10:00:00
@@ -136,12 +141,12 @@ public class CALENDAR_TO_RCDB {
     {
     	for(Event event : items){
     		DbEvent ee        = new DbEvent();
-			ee.name           = event.getSummary();
-			ee.description    = event.getDescription();
+			ee.name           = StripNullStrings(event.getSummary());
+			ee.description    = StripNullStrings(event.getDescription());
 			ee.when_beg       = GoogleDateTimeToSqlTimestamp(event.getStart().getDateTime());
 			ee.when_end       = GoogleDateTimeToSqlTimestamp(event.getEnd().getDateTime());
-			ee.link           = event.getHtmlLink();
-			ee.calendar_id    = event.getId();
+			ee.link           = StripNullStrings(event.getHtmlLink());
+			ee.calendar_id    = StripNullStrings(event.getId());
 			ee.status         = event.getStatus();
 			ee.last_updated   = GoogleDateTimeToSqlTimestamp(event.getUpdated());
 			/** Automatic days of week handler!! */
@@ -174,7 +179,7 @@ public class CALENDAR_TO_RCDB {
 				ee.id_cat         = ec.id;
 			}
 			DB.UpdateEventFromCalendar(ee);
-			System.out.println("EventUpdateCompleted();");
+			System.out.println("EventUpdateCompleted("+ee.name+", "+ee.calendar_id+");");
         }
     }
 }

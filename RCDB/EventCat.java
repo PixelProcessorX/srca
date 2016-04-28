@@ -1,10 +1,10 @@
 
 public class EventCat implements ToString {
-	public int id;
-	public int id_fit;
-	public String name;
-	public String description;
-	public String tags;
+	public int id; /** SEARCH FIELD, KEEP -1 FOR SEARCH*/
+	public int id_fit; /** SEARCH FIELD*/
+	public String name; /** SEARCH FIELD*/
+	public String description; /** SEARCH FIELD*/
+	public String tags; /** SEARCH FIELD*/
 	//For Search Functionality
 	public int _id_improve;
 	//===========================================================================

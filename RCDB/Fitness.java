@@ -1,8 +1,8 @@
 
 public class Fitness implements ToString {
-	public int id;
-	public String name;
-	public String description;
+	public int id; /** SEARCH FIELD, KEEP -1 FOR SEARCH*/
+	public String name; /** SEARCH FIELD*/
+	public String description; /** SEARCH FIELD*/
 	//For Search Functionality
 	public int _id_impr;
 	//===========================================================================

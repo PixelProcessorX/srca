@@ -1,9 +1,9 @@
 
 public class DbEvent implements ToString {
-	public int id;
-	public int id_cat;
-	public int id_instructor;
-	public String name;
+	public int id; /** SEARCH FIELD*/
+	public int id_cat; /** SEARCH FIELD*/
+	public int id_instructor; /** MUST BE -1 */
+	public String name; /** SEARCH FIELD*/
 	public String description;
 	public String when_day;
 	public java.sql.Timestamp when_beg;
