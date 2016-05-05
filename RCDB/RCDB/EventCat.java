@@ -1,20 +1,27 @@
+package RCDB;
 
-public class Fitness implements ToString {
+public class EventCat implements ToString {
 	public int id; /** SEARCH FIELD, KEEP -1 FOR SEARCH*/
+	public int id_fit; /** SEARCH FIELD*/
 	public String name; /** SEARCH FIELD*/
 	public String description; /** SEARCH FIELD*/
+	public String tags; /** SEARCH FIELD*/
 	//For Search Functionality
-	public int _id_impr;
+	public int _id_improve;
 	//===========================================================================
 	public String toString(){
 		return (Integer.toString(id) + " " + 
+				Integer.toString(id_fit) + " " + 
 				name + " " + 
-				description);
+				description + " [" + 
+				tags + "]");
 	}
-	Fitness(){
+	EventCat(){
 		id = -1;
-		_id_impr = -1;
+		id_fit = -1;
+		_id_improve = -1;
 		name = "NULL";
 		description = "NULL";
+		tags = "NULL";
 	}
 }

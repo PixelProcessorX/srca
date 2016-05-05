@@ -1,3 +1,4 @@
+package RCDB;
 import java.io.Serializable;
 
 public class UserGoal implements Serializable {

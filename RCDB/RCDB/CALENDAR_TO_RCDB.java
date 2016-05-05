@@ -1,3 +1,4 @@
+package RCDB;
 import java.sql.*;
 import java.io.*;
 import java.util.Arrays;
@@ -104,7 +105,7 @@ public class CALENDAR_TO_RCDB {
     throws Exception
     {
     	try{
-            Connection c = DB.ConnectToDatabase();
+            DB.ConnectToDatabase();
         }catch(Exception e){
         	throw new IllegalStateException("Could not connect to database!", e);
         }

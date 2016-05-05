@@ -1,3 +1,4 @@
+package RCDB;
 
 public class User implements ToString {
 	public int id;

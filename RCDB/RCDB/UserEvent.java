@@ -1,3 +1,4 @@
+package RCDB;
 
 public class UserEvent implements ToString {
 	public int id;

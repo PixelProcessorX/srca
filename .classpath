@@ -97,5 +97,6 @@
 	<classpathentry kind="lib" path="E:/[]/RCDB/libs/2/transaction-api-1.1.jar"/>
 	<classpathentry kind="lib" path="E:/[]/RCDB/libs/activation.jar"/>
 	<classpathentry kind="lib" path="E:/[]/RCDB/libs/mail.jar"/>
+	<classpathentry kind="lib" path="E:/[]/RCDB/libs/lipermi-0.4.jar"/>
 	<classpathentry kind="output" path="RCDB"/>
 </classpath>

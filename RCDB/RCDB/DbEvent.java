@@ -1,3 +1,4 @@
+package RCDB;
 
 public class DbEvent implements ToString {
 	public int id; /** SEARCH FIELD*/

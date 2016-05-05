@@ -1,26 +1,21 @@
+package RCDB;
 
-public class EventCat implements ToString {
+public class Improvement implements ToString {
 	public int id; /** SEARCH FIELD, KEEP -1 FOR SEARCH*/
 	public int id_fit; /** SEARCH FIELD*/
 	public String name; /** SEARCH FIELD*/
 	public String description; /** SEARCH FIELD*/
-	public String tags; /** SEARCH FIELD*/
-	//For Search Functionality
-	public int _id_improve;
 	//===========================================================================
 	public String toString(){
 		return (Integer.toString(id) + " " + 
 				Integer.toString(id_fit) + " " + 
 				name + " " + 
-				description + " [" + 
-				tags + "]");
+				description);
 	}
-	EventCat(){
+	Improvement(){
 		id = -1;
 		id_fit = -1;
-		_id_improve = -1;
 		name = "NULL";
 		description = "NULL";
-		tags = "NULL";
 	}
 }

@@ -1,0 +1,15 @@
+To import the sql file, delete the rcdb database schema (after logging in).
+Then create another rcdb schema that's empty.
+Next, run the import batch command:
+
+"C:\Program Files\MySQL\MySQL Server 5.7\bin\mysql.exe" -u root -p rcdb < IMPORTFILENAME.SQL
+
+This gives you the entire updated database as-is.
+
+THE DATABASE USERS MUST BE:
+
+Username	Password
+Admin		<see DB.java file>
+User		<see DB.java file>
+mysql.sys	
+root		Administrator Defined Password

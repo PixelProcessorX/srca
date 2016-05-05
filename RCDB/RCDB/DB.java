@@ -1,22 +1,27 @@
+package RCDB;
 import java.sql.*;
 import java.util.ArrayList;
 import java.io.*;
-import java.lang.reflect.*;
 import java.util.*;
 
 import javax.mail.*;
 import javax.mail.internet.*;
-import javax.activation.*;
 
 public class DB {
-	public static String  where     = "localhost"; //IP address or URL after //, etc...
-	public static int     port      = 3306;        //The port the MySQL database is active on.
-	public static String  username  = "JavaAdmin";//"RcAppReadOnlyAcc";
-	public static String  password  = "12345";//"naUoDPnrSJXRi8HI2p";
-	
+	public static String  where           = "localhost"; //IP address or URL after //, etc...
+	public static int     port            = 3306;        //The port the MySQL database is active on.
+	public static String  username        = "User";
+	public static String  password        = "%cr7fj#49Lc)A;_*i`Fslby1XttR99m_";
+	public static String  username_admin  = "Admin";
+	public static String  password_admin  = "tTkd!SyMN%}#E0Fzjb~9Nhcf)y'dko@0";
+   private static String  admin_key       = "8EA8E23FA108B328613678DEEDD9142D6558386DCD6ECECC42F3461443DF5577";
 	public static Connection c = null;
-	static Connection ConnectToDatabase(){
-		Connection connection = null;
+	public static Connection a = null;
+	
+	static boolean CompareToAdminKey(String key){
+		return admin_key.equals(key);
+	}
+	static void ConnectToDatabase(){
 		try{
 		    Class.forName("com.mysql.jdbc.Driver");
 		}catch(ClassNotFoundException e){
@@ -24,14 +29,9 @@ public class DB {
 		}
 		String url = "jdbc:mysql://" + DB.where + ":" + Integer.toString(DB.port) + "/rcdb";
 		try{
-		    c = connection = DriverManager.getConnection(url, DB.username, DB.password);
-		    return connection;
+		    c = DriverManager.getConnection(url, DB.username, DB.password);
+		    a = DriverManager.getConnection(url, DB.username_admin, DB.password_admin);
 		}catch(SQLException e){
-		    /*if(from.debugmode == true){
-			    System.out.println("SQLException: " + e.getMessage());
-			    System.out.println("SQLState: " + e.getSQLState());
-			    System.out.println("VendorError: " + e.getErrorCode());
-		    }*/
 		    throw new IllegalStateException("Cannot connect the database!", e);
 		}
 	}
@@ -46,7 +46,7 @@ public class DB {
 	static protected ResultSet ParamizedExecSQL(String sql, Object... args)
 	throws SQLException
 	{
-		PreparedStatement stmt = c.prepareStatement(sql);
+		PreparedStatement stmt = a.prepareStatement(sql);
 		for(int p = 0; p < args.length; p++){
 			String n = args[p].getClass().getName();
 			switch(n){
@@ -347,7 +347,6 @@ public class DB {
 		myStmt1.setString   (x++, uu.googleid);
 		myStmt1.execute();
 		ResultSet myRs = myStmt1.getResultSet(); //To retrieve the table results.
-		int i = 1;
 		if(!myRs.next()) return false; //If empty, user doesn't exist.
 		return true;
 	}
